@@ -5,6 +5,10 @@ body {
   padding: 0;
   background: linear-gradient(135deg, #4b0000, #a64b4b);
   color: #fff;
+}
+
+/* Login page styles */
+body:has(.login-container) {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -33,7 +37,7 @@ body {
   font-size: 2rem;
   margin-bottom: 10px;
   font-weight: 700;
-  color: #800020; /* Burgundy */
+  color: #800020;
 }
 
 .subtitle {
@@ -59,6 +63,7 @@ body {
   border: 1px solid #800020;
   font-size: 1rem;
   transition: border 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .login-card input:focus {
@@ -68,10 +73,9 @@ body {
 }
 
 /* Button */
-.login-card button {
-  width: 100%;
-  padding: 16px;
-  font-size: 1.1rem;
+.login-card button, button {
+  padding: 14px 24px;
+  font-size: 1rem;
   font-weight: 600;
   border: none;
   border-radius: 10px;
@@ -81,19 +85,199 @@ body {
   transition: background 0.2s, transform 0.1s;
 }
 
-.login-card button:hover {
+.login-card button {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.1rem;
+}
+
+button:hover {
   background-color: #b22222;
   transform: scale(1.02);
 }
 
 /* Error message */
-.error-message {
+.error-message, .error {
   margin-top: 12px;
   font-size: 0.9rem;
   color: red;
 }
 
+/* Main container for inventory and journal */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Navigation */
+.top-nav {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.top-nav h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Filters */
+.filters {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filters input {
+  flex: 1;
+  min-width: 150px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+  color: #4b0000;
+  font-size: 0.95rem;
+}
+
+.filters input::placeholder {
+  color: rgba(75, 0, 0, 0.5);
+}
+
+.filters button {
+  padding: 10px 24px;
+}
+
+/* Wines container */
+.wines-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Wine card */
+.wine-card {
+  background: rgba(255, 255, 255, 0.95);
+  color: #4b0000;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.wine-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.wine-card strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: #800020;
+}
+
+.wine-card p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  color: #4b0000;
+}
+
+.wine-card button {
+  margin-top: 12px;
+  width: 100%;
+}
+
+/* Journal container */
+.journal-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Journal entry */
+.journal-entry {
+  background: rgba(255, 255, 255, 0.95);
+  color: #4b0000;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.journal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #800020;
+}
+
+.journal-header strong {
+  font-size: 1.1rem;
+  color: #800020;
+}
+
+.journal-date {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.journal-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.journal-items li {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(128, 0, 32, 0.1);
+  color: #4b0000;
+}
+
+.journal-items li:last-child {
+  border-bottom: none;
+}
+
 /* Responsive spacing */
+@media (max-width: 768px) {
+  .top-nav {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filters input {
+    width: 100%;
+  }
+
+  .wines-container {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 500px) {
   .login-card {
     padding: 35px 25px;
@@ -106,5 +290,13 @@ body {
   .login-card input, .login-card button {
     font-size: 1rem;
     padding: 12px;
+  }
+
+  .main-container {
+    padding: 10px;
+  }
+
+  .top-nav h1 {
+    font-size: 1.5rem;
   }
 }
