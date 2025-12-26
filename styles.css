@@ -1,96 +1,110 @@
-/* Reset some basic styles */
-* {
-  box-sizing: border-box;
+/* Google font */
+body {
+  font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-  background: #f4f4f4;
+  background: linear-gradient(135deg, #4b0000, #a64b4b);
+  color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
 }
 
+/* Container */
 .login-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   padding: 20px;
 }
 
+/* Card */
 .login-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 30px 25px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.login-card h1 {
+  background: rgba(255, 255, 255, 0.95);
+  color: #4b0000;
+  border-radius: 16px;
+  padding: 40px 30px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   text-align: center;
-  margin-bottom: 25px;
-  color: #333;
-  font-size: 1.8rem;
 }
 
+/* Title */
+.login-card h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: #800020; /* Burgundy */
+}
+
+.subtitle {
+  font-size: 1rem;
+  margin-bottom: 30px;
+  color: #4b0000;
+}
+
+/* Labels & Inputs */
 .login-card label {
   display: block;
+  text-align: left;
   margin-bottom: 5px;
-  color: #555;
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .login-card input {
   width: 100%;
-  padding: 12px;
+  padding: 14px 12px;
   margin-bottom: 20px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  border-radius: 10px;
+  border: 1px solid #800020;
   font-size: 1rem;
-  transition: border 0.2s;
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
 .login-card input:focus {
-  border-color: #007bff;
+  border-color: #b22222;
+  box-shadow: 0 0 8px rgba(178,34,34,0.5);
   outline: none;
 }
 
+/* Button */
 .login-card button {
   width: 100%;
-  padding: 12px;
-  background: #007bff;
-  color: #fff;
+  padding: 16px;
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 600;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
+  background-color: #800020;
+  color: #fff;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
 }
 
 .login-card button:hover {
-  background: #0056b3;
+  background-color: #b22222;
+  transform: scale(1.02);
 }
 
+/* Error message */
 .error-message {
-  color: red;
-  text-align: center;
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 0.9rem;
+  color: red;
 }
 
-/* Responsive adjustments for smaller screens */
+/* Responsive spacing */
 @media (max-width: 500px) {
   .login-card {
-    padding: 25px 20px;
+    padding: 35px 25px;
   }
 
   .login-card h1 {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
 
   .login-card input, .login-card button {
     font-size: 1rem;
+    padding: 12px;
   }
 }
