@@ -2,8 +2,8 @@
  * SUPABASE CONFIGURATION
  ****************************************************/
 
-const SUPABASE_URL = "https://XXXX.supabase.co";
-const SUPABASE_KEY = "YOUR_PUBLISHABLE_KEY";
+const SUPABASE_URL = "https://iidougkfgzrtvrdephkp.supabase.co";
+const SUPABASE_KEY = "sb_publishable_q5zrjLAmfmtFjBsA6D6muw_xBIKKjNX";
 
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
@@ -128,3 +128,4 @@ function renderWines(wines) {
     wineList.appendChild(card);
   });
 }
+
