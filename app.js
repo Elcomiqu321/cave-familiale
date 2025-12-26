@@ -23,7 +23,7 @@ async function checkLogin(personalId, cellarKey) {
   if (data.length === 0) return { success: false, message: "Utilisateur non trouvé" };
 
   const user = data[0];
-  if (cellarKey !== "abcd") return { success: false, message: "Clé de la cave incorrecte" }; // replace with real key if needed
+  if (cellarKey !== "pvs") return { success: false, message: "Clé de la cave incorrecte" }; // replace with real key if needed
 
   // Update last_connection
   await supabase.from('users').update({ last_connection: new Date().toISOString() }).eq('personal_id', personalId);
@@ -125,3 +125,4 @@ async function withdraw(index) {
     alert("Quantité invalide !");
   }
 }
+
