@@ -1,131 +1,127 @@
-/****************************************************
- * SUPABASE CONFIGURATION
- ****************************************************/
-
+// ---------------- SUPABASE SETUP ----------------
 const SUPABASE_URL = "https://iidougkfgzrtvrdephkp.supabase.co";
 const SUPABASE_KEY = "sb_publishable_q5zrjLAmfmtFjBsA6D6muw_xBIKKjNX";
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+// ---------------- LOGIN ----------------
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
 
-/****************************************************
- * GLOBAL STATE
- ****************************************************/
-
-let currentUser = null;
-
-/****************************************************
- * DOM REFERENCES
- ****************************************************/
-
-const loginScreen = document.getElementById("login-screen");
-const appScreen = document.getElementById("app-screen");
-const loginButton = document.getElementById("login-button");
-const loginError = document.getElementById("login-error");
-const personalIdInput = document.getElementById("personal-id");
-const wineList = document.getElementById("wine-list");
-const userNameSpan = document.getElementById("user-name");
-
-/****************************************************
- * LOGIN
- ****************************************************/
-
-loginButton.addEventListener("click", login);
-
-async function login() {
-  loginError.textContent = "";
-
-  const personalId = personalIdInput.value.trim();
-
-  if (!personalId) {
-    loginError.textContent = "Identifiant requis";
-    return;
-  }
-
+async function checkLogin(personalId, cellarKey) {
+  // Fetch user from Supabase
   const { data, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("personal_id", personalId)
-    .single();
-
-  if (error || !data) {
-    loginError.textContent = "Identifiant invalide";
-    return;
-  }
-
-  currentUser = data;
-
-  // Update last connection date
-  await supabase
-    .from("users")
-    .update({ last_connection_at: new Date() })
-    .eq("id", data.id);
-
-  userNameSpan.textContent = data.full_name;
-
-  loginScreen.classList.add("hidden");
-  appScreen.classList.remove("hidden");
-
-  loadWines();
-}
-
-/****************************************************
- * LOAD WINES
- ****************************************************/
-
-async function loadWines() {
-  wineList.innerHTML = "Chargement...";
-
-  const { data, error } = await supabase
-    .from("wines")
-    .select(`
-      id,
-      appellation,
-      climat,
-      millesime,
-      couleur,
-      origine,
-      emplacement,
-      quantity
-    `)
-    .gt("quantity", 0)
-    .order("appellation");
+    .from('users')
+    .select('*')
+    .eq('personal_id', personalId)
+    .limit(1);
 
   if (error) {
-    wineList.innerHTML = "Erreur lors du chargement";
     console.error(error);
-    return;
+    return { success: false, message: "Erreur de connexion à la base" };
   }
 
-  renderWines(data);
+  if (data.length === 0) return { success: false, message: "Utilisateur non trouvé" };
+
+  const user = data[0];
+  if (cellarKey !== "abcd") return { success: false, message: "Clé de la cave incorrecte" }; // replace with real key if needed
+
+  // Update last_connection
+  await supabase.from('users').update({ last_connection: new Date().toISOString() }).eq('personal_id', personalId);
+
+  return { success: true, user };
 }
 
-/****************************************************
- * RENDER WINES
- ****************************************************/
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('personalId').value.trim();
+    const key = document.getElementById('cellarKey').value.trim();
 
-function renderWines(wines) {
-  wineList.innerHTML = "";
-
-  if (wines.length === 0) {
-    wineList.textContent = "Aucune bouteille disponible";
-    return;
-  }
-
-  wines.forEach(wine => {
-    const card = document.createElement("div");
-    card.className = "wine-card";
-
-    card.innerHTML = `
-      <strong>${wine.appellation}${wine.climat ? " – " + wine.climat : ""}</strong><br>
-      ${wine.millesime} • ${wine.couleur}<br>
-      Stock : ${wine.quantity}<br>
-      <small>Emplacement : ${wine.emplacement || "-"}</small>
-    `;
-
-    wineList.appendChild(card);
+    const result = await checkLogin(id, key);
+    if (result.success) {
+      localStorage.setItem('currentUser', JSON.stringify(result.user));
+      window.location.href = "inventaire.html";
+    } else {
+      loginError.textContent = result.message;
+    }
   });
 }
 
+// ---------------- AUTH CHECK ----------------
+function requireLogin() {
+  const user = localStorage.getItem('currentUser');
+  if (!user) {
+    window.location.href = "index.html";
+  }
+}
+
+// ---------------- INVENTAIRE ----------------
+async function fetchWines() {
+  const { data, error } = await supabase
+    .from('wines')
+    .select('*')
+    .order('appellation', { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+  return data;
+}
+
+// Example: render wines (same as before)
+async function initInventaire() {
+  requireLogin();
+  const wines = await fetchWines();
+  renderWines(wines);
+}
+
+function renderWines(list) {
+  const container = document.getElementById('winesList');
+  container.innerHTML = '';
+  list.forEach((wine, i) => {
+    if (wine.quantite <= 0) return; // hide zero stock
+    const div = document.createElement('div');
+    div.className = 'wine-card';
+    div.innerHTML = `
+      <strong>${wine.appellation} - ${wine.climat || ""} (${wine.millesime})</strong>
+      <p>Couleur: ${wine.couleur}, Quantité: ${wine.quantite}, Emplacement: ${wine.emplacement}</p>
+      <button onclick="withdraw(${i})">Retirer</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function withdraw(index) {
+  const container = document.getElementById('winesList');
+  const qty = prompt("Combien de bouteilles voulez-vous retirer ?");
+  const n = parseInt(qty);
+  const wines = await fetchWines();
+  if (!isNaN(n) && n > 0 && n <= wines[index].quantite) {
+    const wine = wines[index];
+    const newQty = wine.quantite - n;
+
+    const { error } = await supabase
+      .from('wines')
+      .update({ quantite: newQty })
+      .eq('appellation', wine.appellation)
+      .eq('millesime', wine.millesime)
+      .eq('emplacement', wine.emplacement);
+
+    if (error) {
+      alert("Erreur lors du retrait !");
+      console.error(error);
+      return;
+    }
+
+    // Optionally log withdrawal in a "logs" table
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    await supabase.from('withdrawals').insert([
+      { user_id: currentUser.personal_id, wine_id: wine.id, quantity: n, date: new Date().toISOString() }
+    ]);
+
+    renderWines(await fetchWines());
+  } else {
+    alert("Quantité invalide !");
+  }
+}
