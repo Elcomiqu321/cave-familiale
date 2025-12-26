@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventaire Cave</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body onload="initInventaire()">
+  <nav>
+    <button onclick="logout()">Déconnexion</button>
+    <button onclick="window.location.href='journal.html'">Journal</button>
+  </nav>
+
+  <h1>Inventaire de la Cave</h1>
+
+  <div class="filters">
+    <label>Appellation: <input type="text" id="filterAppellation"></label>
+    <label>Climat: <input type="text" id="filterClimat"></label>
+    <label>Millésime: <input type="number" id="filterMillesime"></label>
+    <label>Couleur: <input type="text" id="filterCouleur"></label>
+    <button onclick="applyFilters()">Filtrer</button>
+  </div>
+
+  <div id="winesList"></div>
+
+  <script src="app.js"></script>
+  <script>
+    requireLogin();
+
+    const wines = [
+      { appellation:"Bordeaux", climat:"Château Margaux", millesime:2015, couleur:"Rouge", quantite:5, emplacement:"A1", origine:"France" },
+      { appellation:"Bourgogne", climat:"Corton", millesime:2018, couleur:"Blanc", quantite:3, emplacement:"B2", origine:"France" }
+    ];
+
+    function initInventaire() {
+      renderWines(wines);
+    }
+
+    function renderWines(list) {
+      const container = document.getElementById('winesList');
+      container.innerHTML = '';
+      list.forEach((wine, i) => {
+        if(wine.quantite <= 0) return; // hide zero stock
+        const div = document.createElement('div');
+        div.className = 'wine-card';
+        div.innerHTML = `
+          <strong>${wine.appellation} - ${wine.climat || ""} (${wine.millesime})</strong>
+          <p>Couleur: ${wine.couleur}, Quantité: ${wine.quantite}, Emplacement: ${wine.emplacement}</p>
+          <button onclick="withdraw(${i})">Retirer</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function withdraw(index) {
+      const qty = prompt("Combien de bouteilles voulez-vous retirer ?");
+      const n = parseInt(qty);
+      if (!isNaN(n) && n > 0 && n <= wines[index].quantite) {
+        wines[index].quantite -= n;
+        // Log withdrawal (simplified)
+        console.log(`${n} bouteille(s) retirée(s) de ${wines[index].appellation}`);
+        renderWines(wines);
+      } else {
+        alert("Quantité invalide !");
+      }
+    }
+
+    function applyFilters() {
+      const fApp = document.getElementById('filterAppellation').value.toLowerCase();
+      const fClim = document.getElementById('filterClimat').value.toLowerCase();
+      const fMil = document.getElementById('filterMillesime').value;
+      const fCou = document.getElementById('filterCouleur').value.toLowerCase();
+
+      const filtered = wines.filter(w => 
+        (fApp ? w.appellation.toLowerCase().includes(fApp) : true) &&
+        (fClim ? (w.climat||"").toLowerCase().includes(fClim) : true) &&
+        (fMil ? w.millesime == fMil : true) &&
+        (fCou ? w.couleur.toLowerCase().includes(fCou) : true)
+      );
+      renderWines(filtered);
+    }
+
+    function logout() {
+      localStorage.removeItem('currentUser');
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
