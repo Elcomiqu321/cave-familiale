@@ -1,11 +1,71 @@
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  margin: 0;
-  padding: 1rem;
-  background: #fafafa;
-  color: #222;
+* {
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
 }
 
-h1 {
-  font-size: 1.5rem;
+body {
+  margin: 0;
+  padding: 0;
+  background: #fafafa;
+}
+
+.screen {
+  padding: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+h1, h2 {
+  margin-top: 0;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background: #7b1e1e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.error {
+  color: red;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+#wine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wine-card {
+  background: white;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.wine-card strong {
+  font-size: 16px;
 }
