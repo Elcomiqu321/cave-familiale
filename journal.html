@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Journal des Retraits</title>
+  
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body onload="initJournal()">
+  <div class="main-container">
+    <nav class="top-nav">
+      <h1>Journal des Retraits</h1>
+      <div class="nav-buttons">
+        <button onclick="window.location.href='inventaire.html'">Inventaire</button>
+        <button onclick="logout()">Déconnexion</button>
+      </div>
+    </nav>
+
+    <div id="journalList" class="journal-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
