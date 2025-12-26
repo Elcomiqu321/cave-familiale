@@ -1,6 +1,12 @@
 // ---------------- SUPABASE SETUP ----------------
 const SUPABASE_URL = "https://iidougkfgzrtvrdephkp.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZG91Z2tmZ3pydHZyZGVwaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUyMDgwMjEsImV4cCI6MjA1MDc4NDAyMX0.aW2vKeyH_AvUXq9z8FpfGAJrGM96y5FzP1yZVJMFel4";
+const SUPABASE_KEY = "sb_publishable_q5zrjLAmfmtFjBsA6D6muw_xBIKKjNX";
+
+// Check if Supabase is loaded
+if (typeof window.supabase === 'undefined') {
+  console.error('Supabase library not loaded!');
+}
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ---------------- LOGIN ----------------
@@ -8,35 +14,50 @@ const loginForm = document.getElementById('loginForm');
 const loginError = document.getElementById('loginError');
 
 async function checkLogin(personalId, cellarKey) {
-  // Fetch user from Supabase
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('personal_id', personalId)
-    .limit(1);
+  console.log('Attempting login for:', personalId);
+  
+  try {
+    // Fetch user from Supabase
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('personal_id', personalId)
+      .limit(1);
 
-  if (error) {
-    console.error(error);
-    return { success: false, message: "Erreur de connexion à la base" };
+    if (error) {
+      console.error('Supabase error:', error);
+      return { success: false, message: "Erreur de connexion à la base: " + error.message };
+    }
+
+    console.log('Query result:', data);
+
+    if (data.length === 0) {
+      return { success: false, message: "Utilisateur non trouvé" };
+    }
+
+    const user = data[0];
+    if (cellarKey !== "pvs") {
+      return { success: false, message: "Clé de la cave incorrecte" };
+    }
+
+    // Update last_connection_at
+    await supabase
+      .from('users')
+      .update({ last_connection_at: new Date().toISOString() })
+      .eq('id', user.id);
+
+    return { success: true, user };
+  } catch (err) {
+    console.error('Login error:', err);
+    return { success: false, message: "Erreur: " + err.message };
   }
-
-  if (data.length === 0) return { success: false, message: "Utilisateur non trouvé" };
-
-  const user = data[0];
-  if (cellarKey !== "pvs") return { success: false, message: "Clé de la cave incorrecte" };
-
-  // Update last_connection_at (corrected field name)
-  await supabase
-    .from('users')
-    .update({ last_connection_at: new Date().toISOString() })
-    .eq('id', user.id);
-
-  return { success: true, user };
 }
 
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    loginError.textContent = 'Connexion en cours...';
+    
     const id = document.getElementById('personalId').value.trim();
     const key = document.getElementById('cellarKey').value.trim();
 
@@ -68,24 +89,31 @@ function logout() {
 
 // ---------------- INVENTAIRE ----------------
 async function fetchWines() {
-  const { data, error } = await supabase
-    .from('wines')
-    .select('*')
-    .order('appellation', { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from('wines')
+      .select('*')
+      .order('appellation', { ascending: true });
 
-  if (error) {
-    console.error(error);
+    if (error) {
+      console.error('Error fetching wines:', error);
+      return [];
+    }
+    console.log('Fetched wines:', data);
+    return data;
+  } catch (err) {
+    console.error('Exception fetching wines:', err);
     return [];
   }
-  return data;
 }
 
 async function initInventaire() {
   const user = requireLogin();
   if (!user) return;
   
+  console.log('Initializing inventory for user:', user.full_name);
   const wines = await fetchWines();
-  window.allWines = wines; // Store for filtering
+  window.allWines = wines;
   renderWines(wines);
 }
 
@@ -96,12 +124,12 @@ function renderWines(list) {
   container.innerHTML = '';
   
   if (list.length === 0) {
-    container.innerHTML = '<p>Aucun vin trouvé.</p>';
+    container.innerHTML = '<p style="color: white; text-align: center;">Aucun vin trouvé dans l\'inventaire.</p>';
     return;
   }
   
   list.forEach((wine) => {
-    if (wine.quantite <= 0) return; // hide zero stock
+    if (wine.quantite <= 0) return;
     const div = document.createElement('div');
     div.className = 'wine-card';
     div.innerHTML = `
@@ -131,6 +159,8 @@ async function withdrawWine(wineId, currentQuantity) {
   if (!currentUser) return;
 
   try {
+    console.log('Creating withdrawal event...');
+    
     // 1. Create withdrawal event
     const { data: eventData, error: eventError } = await supabase
       .from('withdrawal_events')
@@ -139,6 +169,7 @@ async function withdrawWine(wineId, currentQuantity) {
       .single();
 
     if (eventError) throw eventError;
+    console.log('Event created:', eventData);
 
     // 2. Create withdrawal item
     const { error: itemError } = await supabase
@@ -150,6 +181,7 @@ async function withdrawWine(wineId, currentQuantity) {
       }]);
 
     if (itemError) throw itemError;
+    console.log('Item recorded');
 
     // 3. Update wine quantity
     const newQty = currentQuantity - n;
@@ -159,6 +191,7 @@ async function withdrawWine(wineId, currentQuantity) {
       .eq('id', wineId);
 
     if (updateError) throw updateError;
+    console.log('Quantity updated');
 
     alert(`${n} bouteille(s) retirée(s) avec succès !`);
     
@@ -169,7 +202,7 @@ async function withdrawWine(wineId, currentQuantity) {
     
   } catch (error) {
     console.error('Erreur lors du retrait:', error);
-    alert("Erreur lors du retrait !");
+    alert("Erreur lors du retrait: " + error.message);
   }
 }
 
@@ -196,6 +229,7 @@ async function initJournal() {
   const user = requireLogin();
   if (!user) return;
   
+  console.log('Loading journal...');
   await loadJournal();
 }
 
@@ -218,12 +252,13 @@ async function loadJournal() {
 
     if (error) throw error;
 
+    console.log('Journal data:', data);
     renderJournal(data);
   } catch (error) {
     console.error('Erreur lors du chargement du journal:', error);
     const container = document.getElementById('journalList');
     if (container) {
-      container.innerHTML = '<p class="error">Erreur lors du chargement du journal.</p>';
+      container.innerHTML = '<p class="error" style="color: white;">Erreur lors du chargement du journal: ' + error.message + '</p>';
     }
   }
 }
@@ -235,7 +270,7 @@ function renderJournal(events) {
   container.innerHTML = '';
   
   if (events.length === 0) {
-    container.innerHTML = '<p>Aucun retrait enregistré.</p>';
+    container.innerHTML = '<p style="color: white; text-align: center;">Aucun retrait enregistré.</p>';
     return;
   }
   
