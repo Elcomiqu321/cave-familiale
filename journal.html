@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Journal des Retraits</title>
+  <title>Inventaire Cave</title>
   
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,19 +11,31 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   
+  <!-- Try both possible CSS filenames -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body onload="initJournal()">
+<body onload="initInventaire()">
   <div class="main-container">
     <nav class="top-nav">
-      <h1>Journal des Retraits</h1>
+      <h1>Inventaire de la Cave</h1>
       <div class="nav-buttons">
-        <button onclick="window.location.href='inventaire.html'">Inventaire</button>
+        <button onclick="window.location.href='journal.html'">Journal</button>
         <button onclick="logout()">Déconnexion</button>
       </div>
     </nav>
 
-    <div id="journalList" class="journal-container"></div>
+    <div class="filters">
+      <input type="text" id="filterAppellation" placeholder="Appellation">
+      <input type="text" id="filterClimat" placeholder="Climat">
+      <input type="number" id="filterMillesime" placeholder="Millésime">
+      <input type="text" id="filterCouleur" placeholder="Couleur">
+      <button onclick="applyFilters()">Filtrer</button>
+    </div>
+
+    <div id="winesList" class="wines-container">
+      <p style="color: white;">Chargement...</p>
+    </div>
   </div>
 
   <script src="app.js"></script>
