@@ -1,6 +1,6 @@
 // ---------------- SUPABASE SETUP ----------------
 const SUPABASE_URL = "https://iidougkfgzrtvrdephkp.supabase.co";
-const SUPABASE_KEY = "sb_publishable_q5zrjLAmfmtFjBsA6D6muw_xBIKKjNX";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZG91Z2tmZ3pydHZyZGVwaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3MjU3MzIsImV4cCI6MjA4MjMwMTczMn0.MykkbxetQW1p6gKyxgSDCny2WFT2nS7KB-XPRXDV7Jw";
 
 // Check if Supabase is loaded
 if (typeof window.supabase === 'undefined') {
@@ -302,3 +302,4 @@ function renderJournal(events) {
     container.appendChild(div);
   });
 }
+
