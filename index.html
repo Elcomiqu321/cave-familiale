@@ -1,16 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cave à vin familiale</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Wine Cellar</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+        }
+        .card {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: 40px auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 16px;
+            background: #8b0000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>🍷 Family Wine Cellar</h1>
-  <p>Si ce text est lisible, la page GitHub marche.</p>
+<h1>🍷 Family Wine Cellar</h1>
 
-  <script src="app.js"></script>
+<div class="card">
+    <p>Enter your personal ID to access the cellar</p>
+    <input type="password" placeholder="Personal ID">
+    <input type="password" placeholder="Confirmation PIN">
+    <button>Enter</button>
+</div>
+
 </body>
 </html>
