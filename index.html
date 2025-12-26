@@ -1,47 +1,24 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Cave familiale</title>
-
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Supabase JS client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Cave Familiale</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+  <div class="login-container">
+    <h1>Connexion à la cave</h1>
+    <form id="loginForm">
+      <label for="personalId">Mon ID :</label>
+      <input type="text" id="personalId" required>
 
-  <!-- LOGIN SCREEN -->
-  <div id="login-screen" class="screen">
-    <h1>🍷 Cave familiale</h1>
+      <label for="cellarKey">Clé de la cave :</label>
+      <input type="password" id="cellarKey" required>
 
-    <p>Entrez votre identifiant personnel</p>
-
-    <input
-      type="text"
-      id="personal-id"
-      placeholder="Identifiant"
-      autocomplete="off"
-    />
-
-    <button id="login-button">Entrer</button>
-
-    <p id="login-error" class="error"></p>
-  </div>
-
-  <!-- MAIN APP -->
-  <div id="app-screen" class="screen hidden">
-
-    <header>
-      <h2>Inventaire</h2>
-      <span id="user-name"></span>
-    </header>
-
-    <div id="wine-list"></div>
-
+      <button type="submit">Entrer</button>
+      <p id="loginError" class="error-message"></p>
+    </form>
   </div>
 
   <script src="app.js"></script>
