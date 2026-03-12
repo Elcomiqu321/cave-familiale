@@ -7,7 +7,7 @@ if (typeof window.supabase === 'undefined') {
   console.error('Supabase library not loaded!');
 }
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ---------------- LOGIN ----------------
 const loginForm = document.getElementById('loginForm');
@@ -18,7 +18,7 @@ async function checkLogin(personalId, cellarKey) {
   
   try {
     // Fetch user from Supabase
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('users')
       .select('*')
       .eq('personal_id', personalId)
@@ -41,7 +41,7 @@ async function checkLogin(personalId, cellarKey) {
     }
 
     // Update last_connection_at
-    await supabase
+    await db
       .from('users')
       .update({ last_connection_at: new Date().toISOString() })
       .eq('id', user.id);
@@ -90,7 +90,7 @@ function logout() {
 // ---------------- INVENTAIRE ----------------
 async function fetchWines() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('wines')
       .select('*')
       .order('appellation', { ascending: true });
@@ -162,7 +162,7 @@ async function withdrawWine(wineId, currentQuantity) {
     console.log('Creating withdrawal event...');
     
     // 1. Create withdrawal event
-    const { data: eventData, error: eventError } = await supabase
+    const { data: eventData, error: eventError } = await db
       .from('withdrawal_events')
       .insert([{ user_id: currentUser.id }])
       .select()
@@ -172,7 +172,7 @@ async function withdrawWine(wineId, currentQuantity) {
     console.log('Event created:', eventData);
 
     // 2. Create withdrawal item
-    const { error: itemError } = await supabase
+    const { error: itemError } = await db
       .from('withdrawal_items')
       .insert([{
         withdrawal_event_id: eventData.id,
@@ -185,7 +185,7 @@ async function withdrawWine(wineId, currentQuantity) {
 
     // 3. Update wine quantity
     const newQty = currentQuantity - n;
-    const { error: updateError } = await supabase
+    const { error: updateError } = await db
       .from('wines')
       .update({ quantite: newQty })
       .eq('id', wineId);
@@ -235,7 +235,7 @@ async function initJournal() {
 
 async function loadJournal() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('withdrawal_events')
       .select(`
         id,
@@ -302,4 +302,3 @@ function renderJournal(events) {
     container.appendChild(div);
   });
 }
-
