@@ -25,10 +25,10 @@
     </nav>
 
     <div class="filters">
-      <input type="text" id="filterAppellation" placeholder="Appellation" oninput="applyFilters()">
-      <input type="text" id="filterClimat" placeholder="Climat" oninput="applyFilters()">
-      <input type="number" id="filterMillesime" placeholder="Millésime" oninput="applyFilters()">
-      <input type="text" id="filterCouleur" placeholder="Couleur" oninput="applyFilters()">
+      <input type="text" id="filterAppellation" placeholder="Appellation" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
+      <input type="text" id="filterClimat" placeholder="Climat" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
+      <input type="text" id="filterMillesime" placeholder="Millésime" inputmode="numeric" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
+      <input type="text" id="filterCouleur" placeholder="Couleur" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
     </div>
 
     <!-- Basket panel -->
@@ -57,12 +57,12 @@
       <table id="winesTable" class="wines-table">
         <thead>
           <tr>
-            <th>Appellation</th>
-            <th>Climat</th>
-            <th>Millésime</th>
-            <th>Couleur</th>
-            <th>Qté</th>
-            <th>Emplacement</th>
+            <th class="sortable" onclick="sortWines('appellation')">Appellation <span class="sort-arrow" id="sort-appellation"></span></th>
+            <th class="sortable" onclick="sortWines('climat')">Climat <span class="sort-arrow" id="sort-climat"></span></th>
+            <th class="sortable" onclick="sortWines('millesime')">Millésime <span class="sort-arrow" id="sort-millesime"></span></th>
+            <th class="sortable" onclick="sortWines('couleur')">Couleur <span class="sort-arrow" id="sort-couleur"></span></th>
+            <th class="sortable" onclick="sortWines('quantite')">Qté <span class="sort-arrow" id="sort-quantite"></span></th>
+            <th class="sortable" onclick="sortWines('emplacement')">Emplacement <span class="sort-arrow" id="sort-emplacement"></span></th>
             <th>Retirer</th>
           </tr>
         </thead>
