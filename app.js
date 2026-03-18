@@ -41,7 +41,6 @@ function addToBasket(wineId) {
     });
   }
 
-  input.value = 1;
   updateBasketUI();
   showToast(`${n} × ${wine.appellation} ajouté au panier`);
 }
@@ -312,11 +311,53 @@ function applyFilters() {
   const filtered = window.allWines.filter(w =>
     (fApp ? w.appellation.toLowerCase().includes(fApp) : true) &&
     (fClim ? (w.climat || "").toLowerCase().includes(fClim) : true) &&
-    (fMil ? w.millesime == fMil : true) &&
+    (fMil ? String(w.millesime).includes(fMil) : true) &&
     (fCou ? w.couleur.toLowerCase().includes(fCou) : true)
   );
 
+  window.filteredWines = filtered;
   renderWines(filtered);
+}
+
+// ---------------- SORTING ----------------
+let currentSort = { column: null, ascending: true };
+
+function sortWines(column) {
+  const list = window.filteredWines || window.allWines;
+  if (!list) return;
+
+  // Toggle direction if same column clicked again
+  if (currentSort.column === column) {
+    currentSort.ascending = !currentSort.ascending;
+  } else {
+    currentSort.column = column;
+    currentSort.ascending = true;
+  }
+
+  const sorted = [...list].sort((a, b) => {
+    let valA = a[column] ?? '';
+    let valB = b[column] ?? '';
+
+    // Numeric sort for millesime and quantite
+    if (column === 'millesime' || column === 'quantite') {
+      valA = Number(valA) || 0;
+      valB = Number(valB) || 0;
+      return currentSort.ascending ? valA - valB : valB - valA;
+    }
+
+    // String sort for everything else
+    valA = String(valA).toLowerCase();
+    valB = String(valB).toLowerCase();
+    const cmp = valA.localeCompare(valB, 'fr');
+    return currentSort.ascending ? cmp : -cmp;
+  });
+
+  // Update sort arrows in UI
+  document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
+  const arrowEl = document.getElementById('sort-' + column);
+  if (arrowEl) arrowEl.textContent = currentSort.ascending ? ' ▲' : ' ▼';
+
+  renderWines(sorted);
 }
 
 // ---------------- JOURNAL ----------------
