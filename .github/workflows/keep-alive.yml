@@ -1,0 +1,25 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Runs every 5 days at 8:00 UTC
+    - cron: '0 8 */5 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  ping-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          echo "Pinging Supabase to prevent database pause..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://iidougkfgzrtvrdephkp.supabase.co/rest/v1/wines?select=count&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}")
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" -ne 200 ]; then
+            echo "::warning::Ping returned HTTP $RESPONSE"
+            exit 1
+          fi
+          echo "Database is alive!"
