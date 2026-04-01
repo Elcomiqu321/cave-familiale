@@ -3,7 +3,7 @@ name: Keep Supabase Alive
 on:
   schedule:
     # Runs every 5 days at 8:00 UTC
-    - cron: '0 8 */1 * *'
+    - cron: '0 4 */1 * *'
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
