@@ -15,20 +15,4 @@
       }
     ]
   },
-  {
-    "id": "519000d0-621d-4780-87ef-1d512012c322",
-    "user_id": "f56f8f09-2ef8-4aac-bc77-1445bde25c64",
-    "user_name": "Armand Picard",
-    "withdrawn_at": "2026-04-01T13:11:22.611Z",
-    "items": [
-      {
-        "wine_id": "81b6aa1f-e8ca-4a7a-84bf-7bf882430c10",
-        "appellation": "Bâtard Montrachet Grand Cru",
-        "climat": null,
-        "millesime": 1947,
-        "couleur": "Blanc",
-        "quantity": 1
-      }
-    ]
-  }
 ]
