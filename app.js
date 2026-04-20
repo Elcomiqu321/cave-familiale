@@ -1,12 +1,62 @@
-// ---------------- SUPABASE SETUP ----------------
-const SUPABASE_URL = "https://iidougkfgzrtvrdephkp.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpZG91Z2tmZ3pydHZyZGVwaGtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3MjU3MzIsImV4cCI6MjA4MjMwMTczMn0.MykkbxetQW1p6gKyxgSDCny2WFT2nS7KB-XPRXDV7Jw";
+// =============================================
+// CAVE FAMILIALE — GitHub-backed storage
+// =============================================
 
-if (typeof window.supabase === 'undefined') {
-  console.error('Supabase library not loaded!');
+// ---------------- GITHUB CONFIG ----------------
+// IMPORTANT: Replace GITHUB_TOKEN with your Personal Access Token
+// Generate one at: https://github.com/settings/tokens
+// Scope needed: "repo" (or "public_repo" if repo is public)
+const GITHUB_OWNER = "elcomiqu321";
+const GITHUB_REPO = "cave-familiale";
+const GITHUB_BRANCH = "main";
+const GITHUB_TOKEN = "YOUR_TOKEN_HERE"; // <-- Replace this!
+
+// ---------------- GITHUB API HELPERS ----------------
+const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`;
+
+async function ghRead(path) {
+  const url = `${API_BASE}/${path}?ref=${GITHUB_BRANCH}&t=${Date.now()}`;
+  const res = await fetch(url, {
+    headers: {
+      "Authorization": `token ${GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github.v3+json"
+    },
+    cache: "no-store"
+  });
+
+  if (!res.ok) throw new Error(`Erreur lecture ${path}: ${res.status}`);
+
+  const file = await res.json();
+  const decoded = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+  return { data: JSON.parse(decoded), sha: file.sha };
 }
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function ghWrite(path, data, sha) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  const url = `${API_BASE}/${path}`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Authorization": `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json",
+      "Accept": "application/vnd.github.v3+json"
+    },
+    body: JSON.stringify({
+      message: `update ${path}`,
+      content: content,
+      sha: sha,
+      branch: GITHUB_BRANCH
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(`Erreur écriture ${path}: ${err.message || res.status}`);
+  }
+
+  const result = await res.json();
+  return result.content.sha; // Return new SHA for subsequent writes
+}
 
 // ---------------- BASKET ----------------
 let basket = [];
@@ -18,14 +68,12 @@ function addToBasket(wineId) {
 
   if (!wine || isNaN(n) || n <= 0) return;
 
-  // Check quantity available (accounting for what's already in basket)
   const alreadyInBasket = basket.filter(b => b.wineId === wineId).reduce((sum, b) => sum + b.quantity, 0);
   if (n + alreadyInBasket > wine.quantite) {
     showToast(`Stock insuffisant ! ${wine.quantite - alreadyInBasket} bouteille(s) disponible(s).`);
     return;
   }
 
-  // Check if wine already in basket — if so, add to existing entry
   const existing = basket.find(b => b.wineId === wineId);
   if (existing) {
     existing.quantity += n;
@@ -102,46 +150,52 @@ async function confirmWithdrawal() {
   confirmBtn.textContent = 'Retrait en cours...';
 
   try {
-    // 1. Create one withdrawal event
-    const { data: eventData, error: eventError } = await db
-      .from('withdrawal_events')
-      .insert([{ user_id: currentUser.id }])
-      .select()
-      .single();
+    // 1. Read current wines and withdrawals
+    const winesFile = await ghRead('data/wines.json');
+    const withdrawalsFile = await ghRead('data/withdrawals.json');
 
-    if (eventError) throw eventError;
+    const wines = winesFile.data;
+    const withdrawals = withdrawalsFile.data;
 
-    // 2. Create all withdrawal items
-    const items = basket.map(b => ({
-      withdrawal_event_id: eventData.id,
-      wine_id: b.wineId,
-      quantity: b.quantity
-    }));
-
-    const { error: itemError } = await db
-      .from('withdrawal_items')
-      .insert(items);
-
-    if (itemError) throw itemError;
-
-    // 3. Update each wine's quantity
+    // 2. Update wine quantities
     for (const b of basket) {
-      const wine = window.allWines.find(w => w.id === b.wineId);
+      const wine = wines.find(w => w.id === b.wineId);
       if (!wine) continue;
-      const newQty = wine.quantite - b.quantity;
-      const { error: updateError } = await db
-        .from('wines')
-        .update({ quantite: newQty })
-        .eq('id', b.wineId);
-      if (updateError) throw updateError;
+      if (b.quantity > wine.quantite) {
+        throw new Error(`Stock insuffisant pour ${wine.appellation} (${wine.quantite} restante(s))`);
+      }
+      wine.quantite -= b.quantity;
     }
+
+    // 3. Create withdrawal entry
+    const withdrawal = {
+      id: crypto.randomUUID(),
+      user_id: currentUser.id,
+      user_name: currentUser.full_name,
+      withdrawn_at: new Date().toISOString(),
+      items: basket.map(b => {
+        const wine = wines.find(w => w.id === b.wineId);
+        return {
+          wine_id: b.wineId,
+          appellation: b.appellation,
+          climat: b.climat || null,
+          millesime: b.millesime,
+          couleur: b.couleur,
+          quantity: b.quantity
+        };
+      })
+    };
+    withdrawals.unshift(withdrawal);
+
+    // 4. Write both files back to GitHub
+    const newWinesSha = await ghWrite('data/wines.json', wines, winesFile.sha);
+    await ghWrite('data/withdrawals.json', withdrawals, withdrawalsFile.sha);
 
     showToast('Retrait confirmé !');
     basket = [];
     updateBasketUI();
 
-    // Refresh inventory
-    const wines = await fetchWines();
+    // Refresh inventory from the data we already have
     window.allWines = wines;
     renderWines(wines);
 
@@ -156,7 +210,6 @@ async function confirmWithdrawal() {
 
 // ---------------- TOAST NOTIFICATIONS ----------------
 function showToast(message) {
-  // Remove existing toast
   const old = document.querySelector('.toast');
   if (old) old.remove();
 
@@ -165,7 +218,6 @@ function showToast(message) {
   toast.textContent = message;
   document.body.appendChild(toast);
 
-  // Trigger animation
   requestAnimationFrame(() => toast.classList.add('show'));
 
   setTimeout(() => {
@@ -180,22 +232,24 @@ const loginError = document.getElementById('loginError');
 
 async function checkLogin(personalId, cellarKey) {
   try {
-    const { data, error } = await db
-      .from('users')
-      .select('*')
-      .eq('personal_id', personalId)
-      .limit(1);
+    const { data: users } = await ghRead('data/users.json');
+    const user = users.find(u => u.personal_id === personalId);
 
-    if (error) return { success: false, message: "Erreur de connexion à la base: " + error.message };
-    if (data.length === 0) return { success: false, message: "Utilisateur non trouvé" };
-
-    const user = data[0];
+    if (!user) return { success: false, message: "Utilisateur non trouvé" };
     if (cellarKey !== "pvs") return { success: false, message: "Clé de la cave incorrecte" };
 
-    await db
-      .from('users')
-      .update({ last_connection_at: new Date().toISOString() })
-      .eq('id', user.id);
+    // Update last_connection_at (best-effort, don't block login if it fails)
+    try {
+      const usersFile = await ghRead('data/users.json');
+      const freshUsers = usersFile.data;
+      const freshUser = freshUsers.find(u => u.personal_id === personalId);
+      if (freshUser) {
+        freshUser.last_connection_at = new Date().toISOString();
+        await ghWrite('data/users.json', freshUsers, usersFile.sha);
+      }
+    } catch (e) {
+      console.warn('Could not update last_connection_at:', e);
+    }
 
     return { success: true, user };
   } catch (err) {
@@ -240,12 +294,7 @@ function logout() {
 // ---------------- INVENTAIRE ----------------
 async function fetchWines() {
   try {
-    const { data, error } = await db
-      .from('wines')
-      .select('*')
-      .order('appellation', { ascending: true });
-
-    if (error) { console.error('Error fetching wines:', error); return []; }
+    const { data } = await ghRead('data/wines.json');
     return data;
   } catch (err) {
     console.error('Exception fetching wines:', err);
@@ -326,7 +375,6 @@ function sortWines(column) {
   const list = window.filteredWines || window.allWines;
   if (!list) return;
 
-  // Toggle direction if same column clicked again
   if (currentSort.column === column) {
     currentSort.ascending = !currentSort.ascending;
   } else {
@@ -338,21 +386,18 @@ function sortWines(column) {
     let valA = a[column] ?? '';
     let valB = b[column] ?? '';
 
-    // Numeric sort for millesime and quantite
     if (column === 'millesime' || column === 'quantite') {
       valA = Number(valA) || 0;
       valB = Number(valB) || 0;
       return currentSort.ascending ? valA - valB : valB - valA;
     }
 
-    // String sort for everything else
     valA = String(valA).toLowerCase();
     valB = String(valB).toLowerCase();
     const cmp = valA.localeCompare(valB, 'fr');
     return currentSort.ascending ? cmp : -cmp;
   });
 
-  // Update sort arrows in UI
   document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
   const arrowEl = document.getElementById('sort-' + column);
   if (arrowEl) arrowEl.textContent = currentSort.ascending ? ' ▲' : ' ▼';
@@ -369,23 +414,8 @@ async function initJournal() {
 
 async function loadJournal() {
   try {
-    const { data, error } = await db
-      .from('withdrawal_events')
-      .select(`
-        id,
-        withdrawn_at,
-        user_id,
-        users (full_name),
-        withdrawal_items (
-          quantity,
-          wine_id,
-          wines (appellation, climat, millesime, couleur)
-        )
-      `)
-      .order('withdrawn_at', { ascending: false });
-
-    if (error) throw error;
-    renderJournal(data);
+    const { data: withdrawals } = await ghRead('data/withdrawals.json');
+    renderJournal(withdrawals);
   } catch (error) {
     console.error('Erreur lors du chargement du journal:', error);
     const container = document.getElementById('journalList');
@@ -408,16 +438,15 @@ function renderJournal(events) {
 
   events.forEach(event => {
     const date = new Date(event.withdrawn_at).toLocaleString('fr-FR');
-    const userName = event.users?.full_name || 'Utilisateur inconnu';
+    const userName = event.user_name || 'Utilisateur inconnu';
 
     const div = document.createElement('div');
     div.className = 'journal-entry';
 
     let itemsHtml = '';
-    event.withdrawal_items.forEach(item => {
-      const wine = item.wines;
+    event.items.forEach(item => {
       itemsHtml += `
-        <li>${item.quantity} × ${wine.appellation}${wine.climat ? ' – ' + wine.climat : ''} (${wine.millesime}, ${wine.couleur})</li>
+        <li>${item.quantity} × ${item.appellation}${item.climat ? ' – ' + item.climat : ''} (${item.millesime}, ${item.couleur})</li>
       `;
     });
 
