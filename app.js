@@ -9,7 +9,7 @@
 const GITHUB_OWNER = "elcomiqu321";
 const GITHUB_REPO = "cave-familiale";
 const GITHUB_BRANCH = "main";
-const GITHUB_TOKEN = "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"; //
+const GITHUB_TOKEN = "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"; //
 
 // ---------------- GITHUB API HELPERS ----------------
 const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`;
