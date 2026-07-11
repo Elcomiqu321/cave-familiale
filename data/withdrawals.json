@@ -1,5 +1,21 @@
 [
   {
+    "id": "14ca8f45-8118-4bbb-bb83-ed4862c31dd4",
+    "user_id": "f56f8f09-2ef8-4aac-bc77-1445bde25c64",
+    "user_name": "Armand Picard",
+    "withdrawn_at": "2026-07-11T16:09:37.974Z",
+    "items": [
+      {
+        "wine_id": "041cc5ca-9c6d-4965-91d4-175b5ad461ec",
+        "appellation": "Chambertin Grand Cru",
+        "climat": null,
+        "millesime": 1938,
+        "couleur": "Rouge",
+        "quantity": 30
+      }
+    ]
+  },
+  {
     "id": "e4917c46-3bcd-473d-9ade-0b6d9f95b28e",
     "user_id": "f56f8f09-2ef8-4aac-bc77-1445bde25c64",
     "user_name": "Armand Picard",
