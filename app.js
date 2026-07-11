@@ -308,9 +308,184 @@ async function initInventaire() {
   const user = requireLogin();
   if (!user) return;
 
+  buildFilterUI();
+
   const wines = await fetchWines();
   window.allWines = wines;
   renderWines(wines);
+}
+
+// ---------------- FILTERS (checkbox dropdowns) ----------------
+const FILTER_FIELDS = [
+  { key: 'appellation', label: 'Appellation' },
+  { key: 'climat', label: 'Climat' },
+  { key: 'millesime', label: 'Millésime' },
+  { key: 'couleur', label: 'Couleur' }
+];
+
+const selectedFilters = {};
+FILTER_FIELDS.forEach(f => { selectedFilters[f.key] = new Set(); });
+
+function buildFilterUI() {
+  const row = document.getElementById('filtersRow');
+  if (!row) return;
+
+  row.innerHTML = FILTER_FIELDS.map(f => `
+    <div class="filter-dropdown" id="filterWrap-${f.key}">
+      <input type="text" id="filterInput-${f.key}" class="filter-input" placeholder="${f.label}"
+        autocomplete="off"
+        onclick="openFilterDropdown('${f.key}')"
+        onfocus="openFilterDropdown('${f.key}')"
+        oninput="onFilterSearch('${f.key}')"
+        onkeydown="if(event.key==='Escape'){this.blur(); closeFilterDropdown('${f.key}');}">
+      <div class="filter-options" id="filterOptions-${f.key}"></div>
+    </div>
+  `).join('');
+
+  document.addEventListener('click', (e) => {
+    FILTER_FIELDS.forEach(f => {
+      const wrap = document.getElementById('filterWrap-' + f.key);
+      if (wrap && !wrap.contains(e.target)) closeFilterDropdown(f.key);
+    });
+  });
+}
+
+function getUniqueValues(key) {
+  const wines = window.allWines || [];
+  const values = wines
+    .map(w => w[key])
+    .filter(v => v !== null && v !== undefined && v !== '')
+    .map(v => String(v));
+  const unique = [...new Set(values)];
+
+  if (key === 'millesime') {
+    unique.sort((a, b) => Number(b) - Number(a));
+  } else {
+    unique.sort((a, b) => a.localeCompare(b, 'fr'));
+  }
+  return unique;
+}
+
+function renderFilterOptions(key, searchTerm = '') {
+  const container = document.getElementById('filterOptions-' + key);
+  if (!container) return;
+
+  container.innerHTML = '';
+  const selected = selectedFilters[key];
+
+  if (selected.size > 0) {
+    const header = document.createElement('div');
+    header.className = 'filter-option-header';
+
+    const countSpan = document.createElement('span');
+    countSpan.textContent = `${selected.size} sélectionné(s)`;
+
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.textContent = 'Effacer';
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearFilterValues(key);
+    });
+
+    header.appendChild(countSpan);
+    header.appendChild(clearBtn);
+    container.appendChild(header);
+  }
+
+  const term = searchTerm.trim().toLowerCase();
+  const options = getUniqueValues(key).filter(v => !term || v.toLowerCase().includes(term));
+
+  if (options.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'filter-option-empty';
+    empty.textContent = 'Aucun résultat';
+    container.appendChild(empty);
+    return;
+  }
+
+  options.forEach(v => {
+    const label = document.createElement('label');
+    label.className = 'filter-option';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = selected.has(v);
+    checkbox.addEventListener('change', () => toggleFilterValue(key, v, checkbox.checked));
+
+    const span = document.createElement('span');
+    span.textContent = v;
+
+    label.appendChild(checkbox);
+    label.appendChild(span);
+    container.appendChild(label);
+  });
+}
+
+function openFilterDropdown(key) {
+  FILTER_FIELDS.forEach(f => {
+    if (f.key !== key) closeFilterDropdown(f.key);
+  });
+
+  const wrap = document.getElementById('filterWrap-' + key);
+  if (!wrap) return;
+
+  wrap.classList.add('open');
+  renderFilterOptions(key, '');
+}
+
+function closeFilterDropdown(key) {
+  const wrap = document.getElementById('filterWrap-' + key);
+  if (!wrap) return;
+
+  wrap.classList.remove('open');
+  const input = document.getElementById('filterInput-' + key);
+  if (input) input.value = '';
+  updateFilterInputPlaceholder(key);
+}
+
+function onFilterSearch(key) {
+  const input = document.getElementById('filterInput-' + key);
+  renderFilterOptions(key, input ? input.value : '');
+}
+
+function toggleFilterValue(key, value, checked) {
+  const set = selectedFilters[key];
+  if (checked) set.add(value);
+  else set.delete(value);
+
+  const input = document.getElementById('filterInput-' + key);
+  renderFilterOptions(key, input ? input.value : '');
+  updateFilterInputPlaceholder(key);
+  applyFilters();
+}
+
+function clearFilterValues(key) {
+  selectedFilters[key].clear();
+  const input = document.getElementById('filterInput-' + key);
+  renderFilterOptions(key, input ? input.value : '');
+  updateFilterInputPlaceholder(key);
+  applyFilters();
+}
+
+function updateFilterInputPlaceholder(key) {
+  const input = document.getElementById('filterInput-' + key);
+  const wrap = document.getElementById('filterWrap-' + key);
+  if (!input) return;
+
+  const field = FILTER_FIELDS.find(f => f.key === key);
+  const set = selectedFilters[key];
+
+  if (set.size === 0) {
+    input.placeholder = field.label;
+    if (wrap) wrap.classList.remove('has-selection');
+  } else if (set.size === 1) {
+    input.placeholder = [...set][0];
+    if (wrap) wrap.classList.add('has-selection');
+  } else {
+    input.placeholder = `${field.label} (${set.size})`;
+    if (wrap) wrap.classList.add('has-selection');
+  }
 }
 
 function renderWines(list) {
@@ -354,16 +529,13 @@ function renderWines(list) {
 function applyFilters() {
   if (!window.allWines) return;
 
-  const fApp = document.getElementById('filterAppellation')?.value.toLowerCase() || '';
-  const fClim = document.getElementById('filterClimat')?.value.toLowerCase() || '';
-  const fMil = document.getElementById('filterMillesime')?.value || '';
-  const fCou = document.getElementById('filterCouleur')?.value.toLowerCase() || '';
-
   const filtered = window.allWines.filter(w =>
-    (fApp ? w.appellation.toLowerCase().includes(fApp) : true) &&
-    (fClim ? (w.climat || "").toLowerCase().includes(fClim) : true) &&
-    (fMil ? String(w.millesime).includes(fMil) : true) &&
-    (fCou ? w.couleur.toLowerCase().includes(fCou) : true)
+    FILTER_FIELDS.every(f => {
+      const set = selectedFilters[f.key];
+      if (set.size === 0) return true;
+      const val = w[f.key];
+      return val !== null && val !== undefined && set.has(String(val));
+    })
   );
 
   window.filteredWines = filtered;
