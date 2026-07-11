@@ -21,12 +21,7 @@
       </div>
     </nav>
 
-    <div class="filters">
-      <input type="text" id="filterAppellation" placeholder="Appellation" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
-      <input type="text" id="filterClimat" placeholder="Climat" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
-      <input type="text" id="filterMillesime" placeholder="Millésime" inputmode="numeric" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
-      <input type="text" id="filterCouleur" placeholder="Couleur" oninput="applyFilters()" onkeydown="if(event.key==='Enter')applyFilters()">
-    </div>
+    <div class="filters" id="filtersRow"></div>
 
     <!-- Basket panel -->
     <div id="basketPanel" class="basket-panel hidden">
