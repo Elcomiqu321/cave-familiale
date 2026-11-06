@@ -17,7 +17,7 @@ This README is written for an AI assistant (or a new contributor) picking up thi
 
 ## Data model (`data/*.json`)
 
-- `data/wines.json` — array of wine objects: `id` (uuid), `appellation`, `climat` (nullable), `millesime` (year, number), `couleur` (`"Rouge"` | `"Blanc"`), `origine`, `emplacement`, `quantite` (int), `categorie`.
+- `data/wines.json` — array of wine objects: `id` (uuid), `appellation`, `cru` (nullable), `climat` (nullable, the workbook's Climat/Cuvée), `millesime` (year, number), `couleur` (`"Rouge"` | `"Blanc"`), `origine`, `emplacement` (cellar location code), and `quantite` (int).
 - `data/users.json` — array: `id`, `full_name`, `personal_id` (login username), `last_connection_at`.
 - `data/withdrawals.json` — array of withdrawal events: `id`, `user_id`, `user_name`, `withdrawn_at`, `items[]` (snapshot of wine info + `quantity` withdrawn at the time).
 - Only wines with `quantite > 0` are shown in the inventory table (`renderWines` filters them out otherwise).
@@ -28,6 +28,12 @@ This README is written for an AI assistant (or a new contributor) picking up thi
 - **Inventory**: `fetchWines()` → `window.allWines`. `applyFilters()` reads filter inputs and produces `window.filteredWines`, then calls `renderWines()`. `sortWines(column)` sorts whichever of `filteredWines`/`allWines` is currently active and re-renders.
 - **Basket**: client-side only (`basket` array in memory) until `confirmWithdrawal()` runs — that re-reads `wines.json` + `withdrawals.json` fresh (to get current SHAs), decrements quantities, appends a withdrawal record, and writes both files back via `ghWrite`.
 - **Toasts**: `showToast(message)` for transient feedback.
+
+## Mobile installation
+
+- The site is a Progressive Web App. `manifest.webmanifest`, the icons, and `service-worker.js` provide install metadata and cache the app shell; wine/user data is still fetched from GitHub and is not cached offline.
+- GitHub Pages serves the site over HTTPS, which is required for installation and service workers. Android/desktop browsers can use **Installer l’application**. On iPhone/iPad, open the site in Safari and choose **Partager → Sur l’écran d’accueil**.
+- The Pages workflow copies the manifest, service worker, and icons into the deploy artifact.
 
 ## Styling (`styles.css`)
 

@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#800020">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cave Familiale">
   <title>Inventaire Cave</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,6 +23,7 @@
     <nav class="top-nav">
       <h1>Inventaire de la Cave</h1>
       <div class="nav-buttons">
+        <button type="button" class="install-app-button" id="installAppButton">Installer l’application</button>
         <button onclick="window.location.href='journal.html'">Journal</button>
         <button onclick="logout()">Déconnexion</button>
       </div>
@@ -50,7 +58,8 @@
         <thead>
           <tr>
             <th class="sortable" onclick="sortWines('appellation')">Appellation <span class="sort-arrow" id="sort-appellation"></span></th>
-            <th class="sortable" onclick="sortWines('climat')">Climat <span class="sort-arrow" id="sort-climat"></span></th>
+            <th class="sortable" onclick="sortWines('cru')">Cru <span class="sort-arrow" id="sort-cru"></span></th>
+            <th class="sortable" onclick="sortWines('climat')">Climat / Cuvée <span class="sort-arrow" id="sort-climat"></span></th>
             <th class="sortable" onclick="sortWines('millesime')">Millésime <span class="sort-arrow" id="sort-millesime"></span></th>
             <th class="sortable" onclick="sortWines('couleur')">Couleur <span class="sort-arrow" id="sort-couleur"></span></th>
             <th class="sortable" onclick="sortWines('quantite')">Qté <span class="sort-arrow" id="sort-quantite"></span></th>
@@ -59,7 +68,7 @@
           </tr>
         </thead>
         <tbody id="winesList">
-          <tr><td colspan="7" class="loading-msg">Chargement...</td></tr>
+          <tr><td colspan="8" class="loading-msg">Chargement...</td></tr>
         </tbody>
       </table>
     </div>

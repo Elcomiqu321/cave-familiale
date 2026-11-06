@@ -83,7 +83,9 @@ function addToBasket(wineId) {
     basket.push({
       wineId: wine.id,
       appellation: wine.appellation,
+      cru: wine.cru || '',
       climat: wine.climat || '',
+      emplacement: wine.emplacement || '',
       millesime: wine.millesime,
       couleur: wine.couleur,
       quantity: n,
@@ -127,7 +129,7 @@ function updateBasketUI() {
   itemsEl.innerHTML = basket.map((item, i) => `
     <div class="basket-item">
       <div class="basket-item-info">
-        <span class="basket-item-name">${item.appellation}${item.climat ? ' – ' + item.climat : ''}</span>
+        <span class="basket-item-name">${item.appellation}${item.cru ? ' – ' + item.cru : ''}${item.climat ? ' – ' + item.climat : ''}</span>
         <span class="basket-item-detail">${item.millesime} · ${item.couleur}</span>
       </div>
       <span class="basket-item-qty">×${item.quantity}</span>
@@ -180,7 +182,9 @@ async function confirmWithdrawal() {
         return {
           wine_id: b.wineId,
           appellation: b.appellation,
+          cru: b.cru || null,
           climat: b.climat || null,
+          emplacement: b.emplacement || null,
           millesime: b.millesime,
           couleur: b.couleur,
           quantity: b.quantity
@@ -318,7 +322,8 @@ async function initInventaire() {
 // ---------------- FILTERS (checkbox dropdowns) ----------------
 const FILTER_FIELDS = [
   { key: 'appellation', label: 'Appellation' },
-  { key: 'climat', label: 'Climat' },
+  { key: 'cru', label: 'Cru' },
+  { key: 'climat', label: 'Climat / Cuvée' },
   { key: 'millesime', label: 'Millésime' },
   { key: 'couleur', label: 'Couleur' }
 ];
@@ -497,7 +502,7 @@ function renderWines(list) {
   const visible = list.filter(w => w.quantite > 0);
 
   if (visible.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">Aucun vin trouvé dans l\'inventaire.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-msg">Aucun vin trouvé dans l\'inventaire.</td></tr>';
     return;
   }
 
@@ -505,7 +510,8 @@ function renderWines(list) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td data-label="Appellation">${wine.appellation}</td>
-      <td data-label="Climat">${wine.climat || '—'}</td>
+      <td data-label="Cru">${wine.cru || '—'}</td>
+      <td data-label="Climat / Cuvée">${wine.climat || '—'}</td>
       <td data-label="Millésime">${wine.millesime}</td>
       <td data-label="Couleur"><span class="color-badge color-${wine.couleur.toLowerCase()}">${wine.couleur}</span></td>
       <td data-label="Qté" class="qty-cell">${wine.quantite}</td>
@@ -620,7 +626,7 @@ function renderJournal(events) {
     let itemsHtml = '';
     event.items.forEach(item => {
       itemsHtml += `
-        <li>${item.quantity} × ${item.appellation}${item.climat ? ' – ' + item.climat : ''} (${item.millesime}, ${item.couleur})</li>
+        <li>${item.quantity} × ${item.appellation}${item.cru ? ' – ' + item.cru : ''}${item.climat ? ' – ' + item.climat : ''} (${item.millesime}, ${item.couleur})</li>
       `;
     });
 
@@ -637,3 +643,49 @@ function renderJournal(events) {
     container.appendChild(div);
   });
 }
+
+// ---------------- PWA INSTALLATION ----------------
+function setupAppInstall() {
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    navigator.serviceWorker.register('./service-worker.js')
+      .catch(error => console.error('Erreur lors de l’activation hors ligne:', error));
+  }
+
+  const installButton = document.getElementById('installAppButton');
+  if (!installButton) return;
+
+  let installPrompt = null;
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+
+  if (isInstalled) {
+    installButton.hidden = true;
+  }
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    installPrompt = event;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installPrompt = null;
+    installButton.hidden = true;
+  });
+
+  installButton.addEventListener('click', async () => {
+    if (!installPrompt) {
+      const isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      alert(isAppleMobile
+        ? 'Dans Safari, touchez Partager puis « Sur l’écran d’accueil » pour installer l’application.'
+        : 'Ouvrez le menu de votre navigateur, puis choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil ».');
+      return;
+    }
+
+    installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    if (result.outcome === 'accepted') installButton.hidden = true;
+    installPrompt = null;
+  });
+}
+
+setupAppInstall();

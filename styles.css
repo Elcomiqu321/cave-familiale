@@ -1197,6 +1197,29 @@ button {
   .basket-toggle { bottom: 16px; right: 16px; padding: 12px 16px; }
 }
 
+.install-app-button[hidden] { display: none; }
+
+.login-card .install-app-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--burgundy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--burgundy);
+  font: inherit;
+  font-weight: 600;
+}
+
+.login-card .install-app-button:hover {
+  background: var(--cream-dark);
+}
+
+.nav-buttons .install-app-button {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
 /* ---- FILTER DROPDOWNS (checkbox multi-select) ---- */
 .filter-dropdown {
   position: relative;
