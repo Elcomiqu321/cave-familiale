@@ -60,8 +60,198 @@ async function ghWrite(path, data, sha) {
   return result.content.sha; // Return new SHA for subsequent writes
 }
 
+// ---------------- ATOMIC MULTI-FILE COMMIT ----------------
+// A withdrawal changes two files: the stock and the history. Writing them one after the other made two
+// commits, so a lost connection (or leaving the page) in between left the stock reduced with nothing in
+// the history. Here every file goes into ONE commit that is published by a single ref update: it either
+// all happens or not at all.
+const GIT_API = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git`;
+
+async function ghApi(url, { method = 'GET', body, raw = false } = {}) {
+  const sep = url.includes('?') ? '&' : '?';
+  let res;
+  try {
+    res = await fetch(method === 'GET' ? `${url}${sep}t=${Date.now()}` : url, {
+      method,
+      headers: {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": raw ? "application/vnd.github.raw+json" : "application/vnd.github+json",
+        ...(body ? { "Content-Type": "application/json" } : {})
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      cache: "no-store"
+    });
+  } catch (e) {
+    const err = new Error('Connexion perdue');
+    err.network = true;
+    throw err;
+  }
+
+  if (!res.ok) {
+    let message = `HTTP ${res.status}`;
+    try { message = (await res.json()).message || message; } catch (e) { /* no JSON body */ }
+    const err = new Error(message);
+    err.status = res.status;
+    throw err;
+  }
+  return raw ? res.text() : res.json();
+}
+
+async function ghHead() {
+  const ref = await ghApi(`${GIT_API}/ref/heads/${GITHUB_BRANCH}`);
+  return ref.object.sha;
+}
+
+// Reads a JSON file exactly as it is in a given commit (a commit never changes, so this is never stale)
+async function ghReadAt(path, commitSha) {
+  return JSON.parse(await ghApi(`${API_BASE}/${path}?ref=${commitSha}`, { raw: true }));
+}
+
+async function ghReadFresh(path) {
+  return ghReadAt(path, await ghHead());
+}
+
+// Reads `paths` from the latest commit, calls update(files) to change them in memory, then commits all
+// the changed files at once. update() returns the changed files ({ path: data }), returns null when
+// there is nothing to do, or throws to cancel. If somebody else committed in the meantime, GitHub refuses
+// the ref update and everything is redone on the fresh data (up to 4 times).
+async function ghCommitFiles(paths, message, update) {
+  const MAX_ATTEMPTS = 4;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const headSha = await ghHead();
+    const headCommit = await ghApi(`${GIT_API}/commits/${headSha}`);
+
+    const files = {};
+    for (const p of paths) files[p] = await ghReadAt(p, headSha);
+
+    const changed = update(files);
+    if (!changed) return { committed: false };
+
+    const tree = await ghApi(`${GIT_API}/trees`, {
+      method: 'POST',
+      body: {
+        base_tree: headCommit.tree.sha,
+        tree: Object.entries(changed).map(([path, data]) => ({
+          path, mode: '100644', type: 'blob', content: JSON.stringify(data, null, 2)
+        }))
+      }
+    });
+    const commit = await ghApi(`${GIT_API}/commits`, {
+      method: 'POST',
+      body: { message, tree: tree.sha, parents: [headSha] }
+    });
+
+    try {
+      await ghApi(`${GIT_API}/refs/heads/${GITHUB_BRANCH}`, {
+        method: 'PATCH',
+        body: { sha: commit.sha, force: false }
+      });
+      return { committed: true, files: changed };
+    } catch (err) {
+      if (err.network) {
+        // The answer may have been lost after GitHub applied the change: look before giving up
+        const nowHead = await ghHead().catch(() => null);
+        if (nowHead === commit.sha) return { committed: true, files: changed };
+        throw err;
+      }
+      const branchMoved = err.status === 409 || (err.status === 422 && /fast forward/i.test(err.message));
+      if (!branchMoved) throw err;
+      if (attempt === MAX_ATTEMPTS) throw new Error('L’inventaire vient d’être modifié par quelqu’un d’autre. Réessayez.');
+      await new Promise(resolve => setTimeout(resolve, 400 * attempt));
+    }
+  }
+}
+
 // ---------------- BASKET ----------------
 let basket = [];
+let pendingWithdrawalId = null; // id of a withdrawal being confirmed whose outcome is not known yet
+let withdrawalInProgress = false;
+
+function newId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  // older phones without crypto.randomUUID
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+// The cart is saved per user in localStorage, so it survives page changes (Inventaire <-> Historique),
+// reloads and closing the app. It is dropped on logout, and after 24 h without any change.
+const BASKET_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function basketStorageKey() {
+  const user = getStoredUser();
+  return user && user.id ? 'basket:' + user.id : null;
+}
+
+function saveBasket() {
+  const key = basketStorageKey();
+  if (!key) return;
+  try {
+    if (basket.length === 0 && !pendingWithdrawalId) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, JSON.stringify({ items: basket, pendingId: pendingWithdrawalId, savedAt: Date.now() }));
+    }
+  } catch (e) { /* storage full or blocked: the cart then only lasts for this page */ }
+}
+
+function loadBasket() {
+  const key = basketStorageKey();
+  if (!key) return;
+  try {
+    const saved = JSON.parse(localStorage.getItem(key));
+    if (saved && Array.isArray(saved.items) && Date.now() - (saved.savedAt || 0) < BASKET_MAX_AGE_MS) {
+      basket = saved.items;
+      pendingWithdrawalId = saved.pendingId || null;
+    } else {
+      localStorage.removeItem(key);
+    }
+  } catch (e) {
+    basket = [];
+  }
+}
+
+function initBasket() {
+  loadBasket();
+  updateBasketUI();
+}
+
+// A previous confirmation may have been cut off (connection lost, page left) after GitHub had already
+// recorded it. Check, so the cart is neither lost nor confirmed twice.
+async function resolvePendingWithdrawal() {
+  if (!pendingWithdrawalId) return;
+  try {
+    const withdrawals = await ghReadFresh('data/withdrawals.json');
+    if (withdrawals.some(w => w.id === pendingWithdrawalId)) {
+      basket = [];
+      showToast('Votre dernier retrait avait bien été enregistré.');
+    }
+    pendingWithdrawalId = null;
+    updateBasketUI();
+  } catch (e) {
+    console.warn('Could not check the pending withdrawal:', e);
+  }
+}
+
+// After loading the stock: drop cart lines for wines that are gone, and cap quantities to what is left
+function reconcileBasket() {
+  if (!window.allWines || basket.length === 0) return;
+
+  let adjusted = false;
+  basket = basket.flatMap(item => {
+    const wine = window.allWines.find(w => w.id === item.wineId);
+    if (!wine || !(wine.quantite > 0)) { adjusted = true; return []; }
+    const quantity = Math.min(item.quantity, wine.quantite);
+    if (quantity !== item.quantity) adjusted = true;
+    return [{ ...item, quantity, maxQuantity: wine.quantite }];
+  });
+
+  updateBasketUI();
+  if (adjusted) showToast('Le panier a été ajusté au stock disponible.');
+}
 
 function addToBasket(wineId) {
   const input = document.getElementById('qty-' + wineId);
@@ -104,6 +294,7 @@ function removeFromBasket(index) {
 
 function clearBasket() {
   basket = [];
+  pendingWithdrawalId = null;
   updateBasketUI();
 }
 
@@ -116,6 +307,8 @@ function updateBasketUI() {
   const clearBtn = document.getElementById('basketClearBtn');
   if (!itemsEl) return;
 
+  saveBasket();
+
   const totalItems = basket.reduce((sum, b) => sum + b.quantity, 0);
 
   // The cart button is always visible; only its counter badge depends on the content
@@ -124,8 +317,8 @@ function updateBasketUI() {
   toggleCountEl.classList.toggle('hidden', totalItems === 0);
   toggle.setAttribute('aria-label', totalItems > 0 ? `Ouvrir le panier (${totalItems})` : 'Ouvrir le panier');
 
-  if (confirmBtn) confirmBtn.disabled = basket.length === 0;
-  if (clearBtn) clearBtn.disabled = basket.length === 0;
+  if (confirmBtn && !withdrawalInProgress) confirmBtn.disabled = basket.length === 0;
+  if (clearBtn) clearBtn.disabled = basket.length === 0 || withdrawalInProgress;
 
   if (basket.length === 0) {
     itemsEl.innerHTML = '<p class="basket-empty">Votre panier est vide.</p>';
@@ -171,75 +364,99 @@ function toggleBasket() {
   else closeBasket();
 }
 
+// Refresh whichever page the cart was confirmed from
+function refreshAfterWithdrawal(wines) {
+  if (document.getElementById('winesList')) {
+    window.allWines = wines;
+    refreshView();
+  }
+  if (document.getElementById('historiqueList')) loadHistorique();
+}
+
 async function confirmWithdrawal() {
-  if (basket.length === 0) return;
+  if (basket.length === 0 || withdrawalInProgress) return;
 
   const currentUser = requireLogin();
   if (!currentUser) return;
 
+  withdrawalInProgress = true;
   const confirmBtn = document.getElementById('basketConfirmBtn');
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Retrait en cours...';
+  updateBasketUI();
+
+  // This id stays with the cart until the outcome is known, so retrying after a lost connection
+  // can never record the same withdrawal twice
+  if (!pendingWithdrawalId) pendingWithdrawalId = newId();
+  saveBasket();
+
+  const withdrawalId = pendingWithdrawalId;
+  const withdrawnAt = new Date().toISOString();
+  const items = basket.map(b => ({ ...b }));
 
   try {
-    // 1. Read current wines and withdrawals
-    const winesFile = await ghRead('data/wines.json');
-    const withdrawalsFile = await ghRead('data/withdrawals.json');
+    // Stock and history are written together, in a single commit
+    const result = await ghCommitFiles(
+      ['data/wines.json', 'data/withdrawals.json'],
+      `Retrait de ${currentUser.full_name}`,
+      (files) => {
+        const wines = files['data/wines.json'];
+        const withdrawals = files['data/withdrawals.json'];
 
-    const wines = winesFile.data;
-    const withdrawals = withdrawalsFile.data;
+        if (withdrawals.some(w => w.id === withdrawalId)) return null; // already recorded by an earlier attempt
 
-    // 2. Update wine quantities
-    for (const b of basket) {
-      const wine = wines.find(w => w.id === b.wineId);
-      if (!wine) continue;
-      if (b.quantity > wine.quantite) {
-        throw new Error(`Stock insuffisant pour ${wine.appellation} (${wine.quantite} restante(s))`);
+        for (const b of items) {
+          const wine = wines.find(w => w.id === b.wineId);
+          if (!wine) throw new Error(`${b.appellation} n’existe plus dans l’inventaire`);
+          if (b.quantity > wine.quantite) {
+            throw new Error(`Stock insuffisant pour ${wine.appellation} (${wine.quantite} restante(s))`);
+          }
+          wine.quantite -= b.quantity;
+        }
+
+        withdrawals.unshift({
+          id: withdrawalId,
+          user_id: currentUser.id,
+          user_name: currentUser.full_name,
+          withdrawn_at: withdrawnAt,
+          items: items.map(b => ({
+            wine_id: b.wineId,
+            appellation: b.appellation,
+            cru: b.cru || null,
+            climat: b.climat || null,
+            emplacement: b.emplacement || null,
+            millesime: b.millesime,
+            couleur: b.couleur,
+            quantity: b.quantity
+          }))
+        });
+
+        return { 'data/wines.json': wines, 'data/withdrawals.json': withdrawals };
       }
-      wine.quantite -= b.quantity;
-    }
+    );
 
-    // 3. Create withdrawal entry
-    const withdrawal = {
-      id: crypto.randomUUID(),
-      user_id: currentUser.id,
-      user_name: currentUser.full_name,
-      withdrawn_at: new Date().toISOString(),
-      items: basket.map(b => {
-        const wine = wines.find(w => w.id === b.wineId);
-        return {
-          wine_id: b.wineId,
-          appellation: b.appellation,
-          cru: b.cru || null,
-          climat: b.climat || null,
-          emplacement: b.emplacement || null,
-          millesime: b.millesime,
-          couleur: b.couleur,
-          quantity: b.quantity
-        };
-      })
-    };
-    withdrawals.unshift(withdrawal);
+    const wines = result.committed ? result.files['data/wines.json'] : await ghReadFresh('data/wines.json');
 
-    // 4. Write both files back to GitHub
-    const newWinesSha = await ghWrite('data/wines.json', wines, winesFile.sha);
-    await ghWrite('data/withdrawals.json', withdrawals, withdrawalsFile.sha);
-
-    showToast('Retrait confirmé !');
     basket = [];
+    pendingWithdrawalId = null;
+    withdrawalInProgress = false;
     updateBasketUI();
     closeBasket();
-
-    // Refresh inventory from the data we already have (filters and sorting are kept)
-    window.allWines = wines;
-    refreshView();
+    showToast('Retrait confirmé !');
+    refreshAfterWithdrawal(wines);
 
   } catch (error) {
     console.error('Erreur lors du retrait:', error);
-    showToast('Erreur : ' + error.message);
+    if (error.network) {
+      showToast('Connexion perdue. Vérifiez-la puis réessayez : le retrait ne sera pas enregistré deux fois.');
+    } else {
+      pendingWithdrawalId = null; // refused: nothing was written, a new attempt gets a new id
+      showToast('Erreur : ' + error.message);
+    }
   } finally {
+    withdrawalInProgress = false;
     confirmBtn.textContent = 'Confirmer le retrait';
-    updateBasketUI(); // re-enables the button only if the basket still has items
+    updateBasketUI(); // re-enables the button only if the cart still has items
   }
 }
 
@@ -311,15 +528,17 @@ if (loginForm) {
 }
 
 // ---------------- AUTH CHECK ----------------
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem('currentUser'));
+  } catch (e) {
+    return null;
+  }
+}
+
 function requireLogin() {
   // The session is kept in localStorage until the user logs out, so they stay signed in by default
-  let user = null;
-  try {
-    user = JSON.parse(localStorage.getItem('currentUser'));
-  } catch (e) {
-    user = null;
-  }
-
+  const user = getStoredUser();
   if (!user) {
     window.location.href = "index.html";
     return null;
@@ -329,6 +548,10 @@ function requireLogin() {
 
 // ---------------- LOGOUT ----------------
 function logout() {
+  try {
+    const key = basketStorageKey();
+    if (key) localStorage.removeItem(key); // the cart does not outlive the session
+  } catch (e) { /* ignore */ }
   localStorage.removeItem('currentUser');
   window.location.href = "index.html";
 }
@@ -349,12 +572,14 @@ async function initInventaire() {
   if (!user) return;
 
   buildFilterUI();
-  updateBasketUI();
+  initBasket();
   setupInventaireListeners();
+  await resolvePendingWithdrawal();
 
   const wines = await fetchWines();
   window.allWines = wines;
   refreshView();
+  reconcileBasket();
 }
 
 // Escape closes the cart first, otherwise the open filter list; a click outside closes the filter list
@@ -704,7 +929,7 @@ function renderWines(list) {
       <td data-label="Emplacement">${wine.emplacement || ''}</td>
       <td data-label="Retirer">
         <div class="add-to-basket">
-          <input type="number" id="qty-${wine.id}" value="1" min="1" max="${wine.quantite}" class="qty-input">
+          <input type="number" inputmode="numeric" pattern="[0-9]*" id="qty-${wine.id}" value="1" min="1" max="${wine.quantite}" class="qty-input">
           <button class="btn-add" onclick="addToBasket('${wine.id}')" title="Ajouter au panier">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
@@ -788,6 +1013,13 @@ function applyFilters() {
 async function initHistorique() {
   const user = requireLogin();
   if (!user) return;
+
+  // The cart is available here too, with its content
+  initBasket();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeBasket();
+  });
+  await resolvePendingWithdrawal();
   await loadHistorique();
 }
 

@@ -23,6 +23,14 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* No double-tap zoom on controls */
+button, input, label { touch-action: manipulation; }
+
 body {
   font-family: 'DM Sans', sans-serif;
   background: linear-gradient(160deg, #1a0008 0%, #3a0011 40%, #5c1a2a 100%);
@@ -867,7 +875,8 @@ button {
   transition: opacity 0.3s, transform 0.3s;
   z-index: 200;
   pointer-events: none;
-  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+  text-align: center;
 }
 
 .toast.show {
@@ -1004,6 +1013,18 @@ button {
     margin-right: 12px;
   }
   .wines-table td:last-child { margin-top: 8px; }
+}
+
+/* Touch screens: iPhone Safari zooms the page when a field with text smaller than 16px is focused,
+   and stays zoomed afterwards. Keep every field at 16px or more. */
+@media (max-width: 768px), (pointer: coarse) {
+  .qty-input,
+  .filter-search,
+  .login-card input {
+    font-size: max(16px, 1rem);
+  }
+
+  .qty-input { width: 64px; }
 }
 
 @media (max-width: 500px) {

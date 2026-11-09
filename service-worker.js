@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cave-familiale-shell-v2';
+const CACHE_NAME = 'cave-familiale-shell-v3';
 const APP_SHELL = [
   './',
   './index.html',

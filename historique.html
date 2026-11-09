@@ -33,6 +33,32 @@
     </div>
   </div>
 
+  <!-- Basket button (floating, always visible): the cart stays active when leaving the inventory -->
+  <button id="basketToggle" type="button" class="basket-toggle" onclick="toggleBasket()"
+    aria-label="Ouvrir le panier" aria-haspopup="dialog" aria-expanded="false">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+    <span id="basketToggleCount" class="basket-toggle-count hidden">0</span>
+  </button>
+
+  <!-- Basket panel -->
+  <div id="basketOverlay" class="basket-overlay hidden" onclick="if (event.target === this) closeBasket()">
+    <div id="basketPanel" class="basket-panel" role="dialog" aria-modal="true" aria-labelledby="basketTitle">
+      <div class="basket-header">
+        <h2 id="basketTitle">Panier de retrait</h2>
+        <span id="basketCount" class="basket-count">0</span>
+        <button type="button" class="basket-close" onclick="closeBasket()" aria-label="Fermer le panier">✕</button>
+      </div>
+      <div id="basketItems" class="basket-items"></div>
+      <div class="basket-actions">
+        <button id="basketClearBtn" class="btn-clear" onclick="clearBasket()">Vider</button>
+        <button id="basketConfirmBtn" class="btn-confirm" onclick="confirmWithdrawal()">Confirmer le retrait</button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
