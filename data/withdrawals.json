@@ -1,5 +1,23 @@
 [
   {
+    "id": "92d9bf3a-6223-4db5-9f07-293428796e87",
+    "user_id": "f56f8f09-2ef8-4aac-bc77-1445bde25c64",
+    "user_name": "Armand Picard",
+    "withdrawn_at": "2026-11-09T16:37:27.333Z",
+    "items": [
+      {
+        "wine_id": "8b711f6a-0e11-44f3-bd16-56bec494b872",
+        "appellation": "Morey Saint Denis",
+        "cru": null,
+        "climat": null,
+        "emplacement": null,
+        "millesime": 1947,
+        "couleur": "Rouge",
+        "quantity": 40
+      }
+    ]
+  },
+  {
     "id": "bbe2f34d-c6c1-4213-ba8a-be194fe96001",
     "user_id": "f56f8f09-2ef8-4aac-bc77-1445bde25c64",
     "user_name": "Armand Picard",
