@@ -8,7 +8,7 @@
     "couleur": "Rouge",
     "origine": null,
     "emplacement": "",
-    "quantite": 130
+    "quantite": 129
   },
   {
     "id": "75b47072-7eee-4234-9e82-6baf2d8b22a6",
@@ -52,7 +52,7 @@
     "couleur": "Rouge",
     "origine": null,
     "emplacement": "",
-    "quantite": 45
+    "quantite": 44
   },
   {
     "id": "a49a82e6-862c-4e12-8257-eecefd74aef8",
@@ -129,7 +129,7 @@
     "couleur": "Rouge",
     "origine": null,
     "emplacement": "",
-    "quantite": 79
+    "quantite": 19
   },
   {
     "id": "54553a53-5a4c-460b-badf-9e5f0fb034c3",
@@ -305,7 +305,7 @@
     "couleur": "Blanc",
     "origine": null,
     "emplacement": "",
-    "quantite": 10
+    "quantite": 9
   },
   {
     "id": "5b9e79ab-f495-4cfb-824b-bc07d1e79d88",
