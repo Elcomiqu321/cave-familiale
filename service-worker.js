@@ -1,9 +1,9 @@
-const CACHE_NAME = 'cave-familiale-shell-v1';
+const CACHE_NAME = 'cave-familiale-shell-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './inventaire.html',
-  './journal.html',
+  './historique.html',
   './app.js',
   './styles.css',
   './manifest.webmanifest',

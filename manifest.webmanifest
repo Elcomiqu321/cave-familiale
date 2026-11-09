@@ -1,6 +1,6 @@
 {
-  "name": "Cave Familiale",
-  "short_name": "Cave",
+  "name": "MyVinothèque",
+  "short_name": "MyVinothèque",
   "description": "Consultez et gérez l’inventaire de la cave familiale.",
   "lang": "fr",
   "start_url": "./index.html",

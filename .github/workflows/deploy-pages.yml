@@ -30,7 +30,8 @@ jobs:
       - name: Prepare site directory
         run: |
           mkdir -p dist
-          cp index.html inventaire.html journal.html app.js styles.css dist/
+          cp index.html inventaire.html historique.html app.js styles.css manifest.webmanifest service-worker.js dist/
+          cp -r icons dist/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

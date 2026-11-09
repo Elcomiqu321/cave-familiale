@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cave Familiale">
-  <title>Inventaire Cave</title>
+  <meta name="apple-mobile-web-app-title" content="MyVinothèque">
+  <title>Inventaire · MyVinothèque</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
@@ -23,35 +23,13 @@
     <nav class="top-nav">
       <h1>Inventaire de la Cave</h1>
       <div class="nav-buttons">
-        <button type="button" class="install-app-button" id="installAppButton">Installer l’application</button>
-        <button onclick="window.location.href='journal.html'">Journal</button>
+        <button onclick="window.location.href='historique.html'">Historique</button>
         <button onclick="logout()">Déconnexion</button>
       </div>
     </nav>
 
     <div class="filters" id="filtersRow"></div>
-
-    <!-- Basket panel -->
-    <div id="basketPanel" class="basket-panel hidden">
-      <div class="basket-header">
-        <h2>Panier de retrait</h2>
-        <span id="basketCount" class="basket-count">0</span>
-      </div>
-      <div id="basketItems" class="basket-items"></div>
-      <div class="basket-actions">
-        <button class="btn-clear" onclick="clearBasket()">Vider</button>
-        <button class="btn-confirm" onclick="confirmWithdrawal()">Confirmer le retrait</button>
-      </div>
-    </div>
-
-    <!-- Basket toggle button (floating) -->
-    <button id="basketToggle" class="basket-toggle hidden" onclick="toggleBasket()">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-      </svg>
-      <span id="basketToggleCount">0</span>
-    </button>
+    <div class="filters-summary" id="filtersSummary"></div>
 
     <div class="table-wrapper">
       <table id="winesTable" class="wines-table">
@@ -71,6 +49,32 @@
           <tr><td colspan="8" class="loading-msg">Chargement...</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Basket button (floating, always visible) -->
+  <button id="basketToggle" type="button" class="basket-toggle" onclick="toggleBasket()"
+    aria-label="Ouvrir le panier" aria-haspopup="dialog" aria-expanded="false">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+    <span id="basketToggleCount" class="basket-toggle-count hidden">0</span>
+  </button>
+
+  <!-- Basket panel: opens above the page content, so checkout never needs scrolling -->
+  <div id="basketOverlay" class="basket-overlay hidden" onclick="if (event.target === this) closeBasket()">
+    <div id="basketPanel" class="basket-panel" role="dialog" aria-modal="true" aria-labelledby="basketTitle">
+      <div class="basket-header">
+        <h2 id="basketTitle">Panier de retrait</h2>
+        <span id="basketCount" class="basket-count">0</span>
+        <button type="button" class="basket-close" onclick="closeBasket()" aria-label="Fermer le panier">✕</button>
+      </div>
+      <div id="basketItems" class="basket-items"></div>
+      <div class="basket-actions">
+        <button id="basketClearBtn" class="btn-clear" onclick="clearBasket()">Vider</button>
+        <button id="basketConfirmBtn" class="btn-confirm" onclick="confirmWithdrawal()">Confirmer le retrait</button>
+      </div>
     </div>
   </div>
 

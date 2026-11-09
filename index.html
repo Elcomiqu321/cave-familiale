@@ -7,10 +7,17 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cave Familiale">
-  <title>Connexion Cave Familiale</title>
+  <meta name="apple-mobile-web-app-title" content="MyVinothèque">
+  <title>Connexion MyVinothèque</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <!-- Already signed in on this device: go straight to the inventory (placed here to avoid a flash of the login form) -->
+  <script>
+    try {
+      if (localStorage.getItem('currentUser')) location.replace('inventaire.html');
+    } catch (e) { /* storage unavailable: show the login form */ }
+  </script>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,7 +28,7 @@
 <body>
   <div class="login-container">
     <div class="login-card">
-      <h1>Cave Familiale</h1>
+      <h1>MyVinothèque</h1>
       <p class="subtitle">Connectez-vous pour accéder à l'inventaire</p>
 
       <form id="loginForm">

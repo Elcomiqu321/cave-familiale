@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cave Familiale">
-  <title>Journal des Retraits</title>
+  <meta name="apple-mobile-web-app-title" content="MyVinothèque">
+  <title>Historique · MyVinothèque</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
@@ -18,18 +18,17 @@
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
-<body onload="initJournal()">
+<body onload="initHistorique()">
   <div class="main-container">
     <nav class="top-nav">
-      <h1>Journal des Retraits</h1>
+      <h1>Historique des Retraits</h1>
       <div class="nav-buttons">
-        <button type="button" class="install-app-button" id="installAppButton">Installer l’application</button>
         <button onclick="window.location.href='inventaire.html'">Inventaire</button>
         <button onclick="logout()">Déconnexion</button>
       </div>
     </nav>
 
-    <div id="journalList" class="journal-container">
+    <div id="historiqueList" class="historique-container">
       <p style="color: white;">Chargement...</p>
     </div>
   </div>

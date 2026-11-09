@@ -1,5 +1,5 @@
 // =============================================
-// CAVE FAMILIALE — GitHub-backed storage
+// MYVINOTHÈQUE — GitHub-backed storage
 // =============================================
 
 // ---------------- GITHUB CONFIG ----------------
@@ -108,23 +108,29 @@ function clearBasket() {
 }
 
 function updateBasketUI() {
-  const panel = document.getElementById('basketPanel');
   const toggle = document.getElementById('basketToggle');
   const countEl = document.getElementById('basketCount');
   const toggleCountEl = document.getElementById('basketToggleCount');
   const itemsEl = document.getElementById('basketItems');
+  const confirmBtn = document.getElementById('basketConfirmBtn');
+  const clearBtn = document.getElementById('basketClearBtn');
+  if (!itemsEl) return;
 
   const totalItems = basket.reduce((sum, b) => sum + b.quantity, 0);
 
-  if (basket.length === 0) {
-    panel.classList.add('hidden');
-    toggle.classList.add('hidden');
-    return;
-  }
-
-  toggle.classList.remove('hidden');
+  // The cart button is always visible; only its counter badge depends on the content
   countEl.textContent = totalItems;
   toggleCountEl.textContent = totalItems;
+  toggleCountEl.classList.toggle('hidden', totalItems === 0);
+  toggle.setAttribute('aria-label', totalItems > 0 ? `Ouvrir le panier (${totalItems})` : 'Ouvrir le panier');
+
+  if (confirmBtn) confirmBtn.disabled = basket.length === 0;
+  if (clearBtn) clearBtn.disabled = basket.length === 0;
+
+  if (basket.length === 0) {
+    itemsEl.innerHTML = '<p class="basket-empty">Votre panier est vide.</p>';
+    return;
+  }
 
   itemsEl.innerHTML = basket.map((item, i) => `
     <div class="basket-item">
@@ -138,9 +144,31 @@ function updateBasketUI() {
   `).join('');
 }
 
+function openBasket() {
+  const overlay = document.getElementById('basketOverlay');
+  if (!overlay) return;
+
+  closeAllFilterDropdowns();
+  overlay.classList.remove('hidden');
+  document.body.classList.add('no-scroll');
+  document.getElementById('basketToggle').setAttribute('aria-expanded', 'true');
+}
+
+function closeBasket() {
+  const overlay = document.getElementById('basketOverlay');
+  if (!overlay) return;
+
+  overlay.classList.add('hidden');
+  document.body.classList.remove('no-scroll');
+  document.getElementById('basketToggle').setAttribute('aria-expanded', 'false');
+}
+
 function toggleBasket() {
-  const panel = document.getElementById('basketPanel');
-  panel.classList.toggle('hidden');
+  const overlay = document.getElementById('basketOverlay');
+  if (!overlay) return;
+
+  if (overlay.classList.contains('hidden')) openBasket();
+  else closeBasket();
 }
 
 async function confirmWithdrawal() {
@@ -149,7 +177,7 @@ async function confirmWithdrawal() {
   const currentUser = requireLogin();
   if (!currentUser) return;
 
-  const confirmBtn = document.querySelector('.btn-confirm');
+  const confirmBtn = document.getElementById('basketConfirmBtn');
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Retrait en cours...';
 
@@ -200,17 +228,18 @@ async function confirmWithdrawal() {
     showToast('Retrait confirmé !');
     basket = [];
     updateBasketUI();
+    closeBasket();
 
-    // Refresh inventory from the data we already have
+    // Refresh inventory from the data we already have (filters and sorting are kept)
     window.allWines = wines;
-    renderWines(wines);
+    refreshView();
 
   } catch (error) {
     console.error('Erreur lors du retrait:', error);
     showToast('Erreur : ' + error.message);
   } finally {
-    confirmBtn.disabled = false;
     confirmBtn.textContent = 'Confirmer le retrait';
+    updateBasketUI(); // re-enables the button only if the basket still has items
   }
 }
 
@@ -283,12 +312,19 @@ if (loginForm) {
 
 // ---------------- AUTH CHECK ----------------
 function requireLogin() {
-  const user = localStorage.getItem('currentUser');
+  // The session is kept in localStorage until the user logs out, so they stay signed in by default
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem('currentUser'));
+  } catch (e) {
+    user = null;
+  }
+
   if (!user) {
     window.location.href = "index.html";
     return null;
   }
-  return JSON.parse(user);
+  return user;
 }
 
 // ---------------- LOGOUT ----------------
@@ -313,13 +349,35 @@ async function initInventaire() {
   if (!user) return;
 
   buildFilterUI();
+  updateBasketUI();
+  setupInventaireListeners();
 
   const wines = await fetchWines();
   window.allWines = wines;
-  renderWines(wines);
+  refreshView();
 }
 
-// ---------------- FILTERS (checkbox dropdowns) ----------------
+// Escape closes the cart first, otherwise the open filter list; a click outside closes the filter list
+function setupInventaireListeners() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+
+    const overlay = document.getElementById('basketOverlay');
+    if (overlay && !overlay.classList.contains('hidden')) closeBasket();
+    else closeAllFilterDropdowns();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!openFilterKey) return;
+    const wrap = document.getElementById('filterWrap-' + openFilterKey);
+    if (wrap && !wrap.contains(e.target)) closeFilterDropdown(openFilterKey);
+  });
+}
+
+// ---------------- FILTERS ----------------
+// One button per field. It opens a list of checkboxes (with a search box when the list is long)
+// that shows how many wines match each value given the other filters. Active filters also appear
+// as removable chips under the buttons, next to the result count.
 const FILTER_FIELDS = [
   { key: 'appellation', label: 'Appellation' },
   { key: 'cru', label: 'Cru' },
@@ -328,8 +386,17 @@ const FILTER_FIELDS = [
   { key: 'couleur', label: 'Couleur' }
 ];
 
+const SEARCH_MIN_OPTIONS = 7; // show the search box above this many values
+
 const selectedFilters = {};
 FILTER_FIELDS.forEach(f => { selectedFilters[f.key] = new Set(); });
+
+let openFilterKey = null;
+let visibleCount = 0;
+
+function isMobileLayout() {
+  return window.matchMedia('(max-width: 768px)').matches;
+}
 
 function buildFilterUI() {
   const row = document.getElementById('filtersRow');
@@ -337,106 +404,151 @@ function buildFilterUI() {
 
   row.innerHTML = FILTER_FIELDS.map(f => `
     <div class="filter-dropdown" id="filterWrap-${f.key}">
-      <input type="text" id="filterInput-${f.key}" class="filter-input" placeholder="${f.label}"
-        autocomplete="off"
-        onclick="openFilterDropdown('${f.key}')"
-        onfocus="openFilterDropdown('${f.key}')"
-        oninput="onFilterSearch('${f.key}')"
-        onkeydown="if(event.key==='Escape'){this.blur(); closeFilterDropdown('${f.key}');}">
-      <div class="filter-options" id="filterOptions-${f.key}"></div>
+      <button type="button" class="filter-btn" id="filterBtn-${f.key}"
+        aria-haspopup="true" aria-expanded="false"
+        onclick="toggleFilterDropdown('${f.key}')">
+        <span class="filter-btn-label">${f.label}</span>
+        <span class="filter-btn-count hidden" id="filterCount-${f.key}">0</span>
+        <svg class="filter-btn-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="filter-panel" id="filterPanel-${f.key}">
+        <div class="filter-panel-header">
+          <span class="filter-panel-title">${f.label}</span>
+          <button type="button" class="filter-panel-close" onclick="closeFilterDropdown('${f.key}')" aria-label="Fermer">✕</button>
+        </div>
+        <input type="search" class="filter-search" id="filterSearch-${f.key}"
+          placeholder="Rechercher…" autocomplete="off"
+          oninput="onFilterSearch('${f.key}')">
+        <div class="filter-options" id="filterOptions-${f.key}"></div>
+        <div class="filter-panel-footer">
+          <button type="button" class="filter-clear" id="filterClear-${f.key}" onclick="clearFilterValues('${f.key}')">Effacer</button>
+          <button type="button" class="filter-done" id="filterDone-${f.key}" onclick="closeFilterDropdown('${f.key}')">Voir les résultats</button>
+        </div>
+      </div>
     </div>
   `).join('');
 
-  document.addEventListener('click', (e) => {
-    FILTER_FIELDS.forEach(f => {
-      const wrap = document.getElementById('filterWrap-' + f.key);
-      if (wrap && !wrap.contains(e.target)) closeFilterDropdown(f.key);
-    });
+  // Dimmed backdrop behind the filter list on small screens, where the list is a bottom sheet
+  if (!document.getElementById('filterBackdrop')) {
+    const backdrop = document.createElement('div');
+    backdrop.id = 'filterBackdrop';
+    backdrop.className = 'filter-backdrop';
+    backdrop.addEventListener('click', closeAllFilterDropdowns);
+    document.body.appendChild(backdrop);
+  }
+}
+
+function matchesFilters(wine, ignoreKey) {
+  return FILTER_FIELDS.every(f => {
+    if (f.key === ignoreKey) return true;
+    const set = selectedFilters[f.key];
+    if (set.size === 0) return true;
+    const val = wine[f.key];
+    return val !== null && val !== undefined && set.has(String(val));
   });
 }
 
-function getUniqueValues(key) {
-  const wines = window.allWines || [];
-  const values = wines
-    .map(w => w[key])
-    .filter(v => v !== null && v !== undefined && v !== '')
-    .map(v => String(v));
-  const unique = [...new Set(values)];
+// Values offered for a field, with the number of in-stock wines each one would show
+// given the other filters. Selected values stay listed so they can always be unticked.
+function getFacetOptions(key) {
+  const counts = new Map();
 
+  (window.allWines || []).forEach(w => {
+    if (!(w.quantite > 0) || !matchesFilters(w, key)) return;
+    const v = w[key];
+    if (v === null || v === undefined || v === '') return;
+    const s = String(v);
+    counts.set(s, (counts.get(s) || 0) + 1);
+  });
+
+  selectedFilters[key].forEach(v => { if (!counts.has(v)) counts.set(v, 0); });
+
+  const options = [...counts].map(([value, count]) => ({ value, count }));
   if (key === 'millesime') {
-    unique.sort((a, b) => Number(b) - Number(a));
+    options.sort((a, b) => Number(b.value) - Number(a.value));
   } else {
-    unique.sort((a, b) => a.localeCompare(b, 'fr'));
+    options.sort((a, b) => a.value.localeCompare(b.value, 'fr'));
   }
-  return unique;
+  return options;
 }
 
-function renderFilterOptions(key, searchTerm = '') {
+function renderFilterOptions(key) {
   const container = document.getElementById('filterOptions-' + key);
+  const searchInput = document.getElementById('filterSearch-' + key);
   if (!container) return;
 
-  container.innerHTML = '';
   const selected = selectedFilters[key];
+  const all = getFacetOptions(key);
 
-  if (selected.size > 0) {
-    const header = document.createElement('div');
-    header.className = 'filter-option-header';
+  const showSearch = all.length >= SEARCH_MIN_OPTIONS;
+  if (searchInput) searchInput.classList.toggle('hidden', !showSearch);
+  const term = showSearch && searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const options = all.filter(o => !term || o.value.toLowerCase().includes(term));
 
-    const countSpan = document.createElement('span');
-    countSpan.textContent = `${selected.size} sélectionné(s)`;
-
-    const clearBtn = document.createElement('button');
-    clearBtn.type = 'button';
-    clearBtn.textContent = 'Effacer';
-    clearBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      clearFilterValues(key);
-    });
-
-    header.appendChild(countSpan);
-    header.appendChild(clearBtn);
-    container.appendChild(header);
-  }
-
-  const term = searchTerm.trim().toLowerCase();
-  const options = getUniqueValues(key).filter(v => !term || v.toLowerCase().includes(term));
+  const scrollTop = container.scrollTop;
+  container.innerHTML = '';
 
   if (options.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'filter-option-empty';
     empty.textContent = 'Aucun résultat';
     container.appendChild(empty);
-    return;
   }
 
-  options.forEach(v => {
+  options.forEach(o => {
     const label = document.createElement('label');
-    label.className = 'filter-option';
+    label.className = 'filter-option' + (selected.has(o.value) ? ' selected' : '');
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
-    checkbox.checked = selected.has(v);
-    checkbox.addEventListener('change', () => toggleFilterValue(key, v, checkbox.checked));
+    checkbox.checked = selected.has(o.value);
+    checkbox.addEventListener('change', () => {
+      label.classList.toggle('selected', checkbox.checked);
+      toggleFilterValue(key, o.value, checkbox.checked);
+    });
 
-    const span = document.createElement('span');
-    span.textContent = v;
+    const text = document.createElement('span');
+    text.className = 'filter-option-label';
+    text.textContent = o.value;
+
+    const count = document.createElement('span');
+    count.className = 'filter-option-count';
+    count.textContent = o.count;
 
     label.appendChild(checkbox);
-    label.appendChild(span);
+    label.appendChild(text);
+    label.appendChild(count);
     container.appendChild(label);
   });
+
+  container.scrollTop = scrollTop;
+  updateFilterFooter(key);
+}
+
+function toggleFilterDropdown(key) {
+  if (openFilterKey === key) closeFilterDropdown(key);
+  else openFilterDropdown(key);
 }
 
 function openFilterDropdown(key) {
-  FILTER_FIELDS.forEach(f => {
-    if (f.key !== key) closeFilterDropdown(f.key);
-  });
+  closeAllFilterDropdowns();
 
   const wrap = document.getElementById('filterWrap-' + key);
   if (!wrap) return;
 
   wrap.classList.add('open');
-  renderFilterOptions(key, '');
+  document.getElementById('filterBtn-' + key).setAttribute('aria-expanded', 'true');
+  openFilterKey = key;
+
+  const backdrop = document.getElementById('filterBackdrop');
+  if (backdrop) backdrop.classList.add('show');
+
+  const search = document.getElementById('filterSearch-' + key);
+  if (search) search.value = '';
+  renderFilterOptions(key);
+
+  // On small screens the list is a bottom sheet: don't focus the search box, it would pop up the keyboard
+  if (search && !search.classList.contains('hidden') && !isMobileLayout()) search.focus();
 }
 
 function closeFilterDropdown(key) {
@@ -444,14 +556,24 @@ function closeFilterDropdown(key) {
   if (!wrap) return;
 
   wrap.classList.remove('open');
-  const input = document.getElementById('filterInput-' + key);
-  if (input) input.value = '';
-  updateFilterInputPlaceholder(key);
+  document.getElementById('filterBtn-' + key).setAttribute('aria-expanded', 'false');
+
+  if (openFilterKey === key) {
+    openFilterKey = null;
+    const backdrop = document.getElementById('filterBackdrop');
+    if (backdrop) backdrop.classList.remove('show');
+  }
+
+  const search = document.getElementById('filterSearch-' + key);
+  if (search) search.value = '';
+}
+
+function closeAllFilterDropdowns() {
+  FILTER_FIELDS.forEach(f => closeFilterDropdown(f.key));
 }
 
 function onFilterSearch(key) {
-  const input = document.getElementById('filterInput-' + key);
-  renderFilterOptions(key, input ? input.value : '');
+  renderFilterOptions(key);
 }
 
 function toggleFilterValue(key, value, checked) {
@@ -459,37 +581,101 @@ function toggleFilterValue(key, value, checked) {
   if (checked) set.add(value);
   else set.delete(value);
 
-  const input = document.getElementById('filterInput-' + key);
-  renderFilterOptions(key, input ? input.value : '');
-  updateFilterInputPlaceholder(key);
   applyFilters();
+}
+
+function removeFilterValue(key, value) {
+  selectedFilters[key].delete(value);
+  applyFilters();
+  if (openFilterKey) renderFilterOptions(openFilterKey);
 }
 
 function clearFilterValues(key) {
   selectedFilters[key].clear();
-  const input = document.getElementById('filterInput-' + key);
-  renderFilterOptions(key, input ? input.value : '');
-  updateFilterInputPlaceholder(key);
   applyFilters();
+  renderFilterOptions(key);
 }
 
-function updateFilterInputPlaceholder(key) {
-  const input = document.getElementById('filterInput-' + key);
+function clearAllFilters() {
+  FILTER_FIELDS.forEach(f => selectedFilters[f.key].clear());
+  applyFilters();
+  if (openFilterKey) renderFilterOptions(openFilterKey);
+}
+
+// Button state: highlighted with a counter badge when values are selected
+function updateFilterButton(key) {
   const wrap = document.getElementById('filterWrap-' + key);
-  if (!input) return;
+  const badge = document.getElementById('filterCount-' + key);
+  const btn = document.getElementById('filterBtn-' + key);
+  if (!wrap || !badge || !btn) return;
 
   const field = FILTER_FIELDS.find(f => f.key === key);
-  const set = selectedFilters[key];
+  const n = selectedFilters[key].size;
 
-  if (set.size === 0) {
-    input.placeholder = field.label;
-    if (wrap) wrap.classList.remove('has-selection');
-  } else if (set.size === 1) {
-    input.placeholder = [...set][0];
-    if (wrap) wrap.classList.add('has-selection');
-  } else {
-    input.placeholder = `${field.label} (${set.size})`;
-    if (wrap) wrap.classList.add('has-selection');
+  wrap.classList.toggle('has-selection', n > 0);
+  badge.classList.toggle('hidden', n === 0);
+  badge.textContent = n;
+  btn.setAttribute('aria-label', n > 0 ? `${field.label} (${n} sélectionné${n > 1 ? 's' : ''})` : field.label);
+}
+
+function updateFilterFooter(key) {
+  const clearBtn = document.getElementById('filterClear-' + key);
+  const doneBtn = document.getElementById('filterDone-' + key);
+
+  if (clearBtn) clearBtn.disabled = selectedFilters[key].size === 0;
+  if (doneBtn) {
+    doneBtn.textContent = visibleCount === 0
+      ? 'Aucun résultat'
+      : `Voir ${visibleCount} vin${visibleCount > 1 ? 's' : ''}`;
+  }
+}
+
+// Result count + removable chips for every active filter
+function renderFiltersSummary(visible) {
+  const el = document.getElementById('filtersSummary');
+  if (!el) return;
+
+  const bottles = visible.reduce((sum, w) => sum + (Number(w.quantite) || 0), 0);
+
+  el.innerHTML = '';
+
+  const count = document.createElement('span');
+  count.className = 'results-count';
+  count.textContent = `${visible.length} vin${visible.length > 1 ? 's' : ''} · ${bottles} bouteille${bottles > 1 ? 's' : ''}`;
+  el.appendChild(count);
+
+  let hasFilters = false;
+  FILTER_FIELDS.forEach(f => {
+    selectedFilters[f.key].forEach(value => {
+      hasFilters = true;
+
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'filter-chip';
+      chip.setAttribute('aria-label', `Retirer le filtre ${f.label} : ${value}`);
+
+      const text = document.createElement('span');
+      text.textContent = value;
+
+      const x = document.createElement('span');
+      x.className = 'filter-chip-x';
+      x.setAttribute('aria-hidden', 'true');
+      x.textContent = '✕';
+
+      chip.appendChild(text);
+      chip.appendChild(x);
+      chip.addEventListener('click', () => removeFilterValue(f.key, value));
+      el.appendChild(chip);
+    });
+  });
+
+  if (hasFilters) {
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.className = 'filters-reset';
+    reset.textContent = 'Tout effacer';
+    reset.addEventListener('click', clearAllFilters);
+    el.appendChild(reset);
   }
 }
 
@@ -515,7 +701,7 @@ function renderWines(list) {
       <td data-label="Millésime">${wine.millesime}</td>
       <td data-label="Couleur"><span class="color-badge color-${wine.couleur.toLowerCase()}">${wine.couleur}</span></td>
       <td data-label="Qté" class="qty-cell">${wine.quantite}</td>
-      <td data-label="Emplacement">${wine.emplacement || '—'}</td>
+      <td data-label="Emplacement">${wine.emplacement || ''}</td>
       <td data-label="Retirer">
         <div class="add-to-basket">
           <input type="number" id="qty-${wine.id}" value="1" min="1" max="${wine.quantite}" class="qty-input">
@@ -532,28 +718,28 @@ function renderWines(list) {
   });
 }
 
-function applyFilters() {
-  if (!window.allWines) return;
-
-  const filtered = window.allWines.filter(w =>
-    FILTER_FIELDS.every(f => {
-      const set = selectedFilters[f.key];
-      if (set.size === 0) return true;
-      const val = w[f.key];
-      return val !== null && val !== undefined && set.has(String(val));
-    })
-  );
-
-  window.filteredWines = filtered;
-  renderWines(filtered);
-}
-
 // ---------------- SORTING ----------------
 let currentSort = { column: null, ascending: true };
 
+function compareWines(a, b) {
+  const column = currentSort.column;
+  let valA = a[column] ?? '';
+  let valB = b[column] ?? '';
+
+  if (column === 'millesime' || column === 'quantite') {
+    valA = Number(valA) || 0;
+    valB = Number(valB) || 0;
+    return currentSort.ascending ? valA - valB : valB - valA;
+  }
+
+  valA = String(valA).toLowerCase();
+  valB = String(valB).toLowerCase();
+  const cmp = valA.localeCompare(valB, 'fr');
+  return currentSort.ascending ? cmp : -cmp;
+}
+
 function sortWines(column) {
-  const list = window.filteredWines || window.allWines;
-  if (!list) return;
+  if (!window.allWines) return;
 
   if (currentSort.column === column) {
     currentSort.ascending = !currentSort.ascending;
@@ -562,51 +748,64 @@ function sortWines(column) {
     currentSort.ascending = true;
   }
 
-  const sorted = [...list].sort((a, b) => {
-    let valA = a[column] ?? '';
-    let valB = b[column] ?? '';
-
-    if (column === 'millesime' || column === 'quantite') {
-      valA = Number(valA) || 0;
-      valB = Number(valB) || 0;
-      return currentSort.ascending ? valA - valB : valB - valA;
-    }
-
-    valA = String(valA).toLowerCase();
-    valB = String(valB).toLowerCase();
-    const cmp = valA.localeCompare(valB, 'fr');
-    return currentSort.ascending ? cmp : -cmp;
-  });
-
-  document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
-  const arrowEl = document.getElementById('sort-' + column);
-  if (arrowEl) arrowEl.textContent = currentSort.ascending ? ' ▲' : ' ▼';
-
-  renderWines(sorted);
+  refreshView();
 }
 
-// ---------------- JOURNAL ----------------
-async function initJournal() {
+function updateSortArrows() {
+  document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
+  if (!currentSort.column) return;
+
+  const arrowEl = document.getElementById('sort-' + currentSort.column);
+  if (arrowEl) arrowEl.textContent = currentSort.ascending ? ' ▲' : ' ▼';
+}
+
+// ---------------- VIEW (filters + sorting -> table) ----------------
+function getVisibleWines() {
+  const list = (window.allWines || []).filter(w => w.quantite > 0 && matchesFilters(w, null));
+  return currentSort.column ? [...list].sort(compareWines) : list;
+}
+
+// Single entry point: filtering and sorting always combine, whichever one changed last
+function refreshView() {
+  if (!window.allWines) return;
+
+  const visible = getVisibleWines();
+  window.filteredWines = visible;
+  visibleCount = visible.length;
+
+  renderWines(visible);
+  renderFiltersSummary(visible);
+  FILTER_FIELDS.forEach(f => updateFilterButton(f.key));
+  if (openFilterKey) updateFilterFooter(openFilterKey);
+  updateSortArrows();
+}
+
+function applyFilters() {
+  refreshView();
+}
+
+// ---------------- HISTORIQUE ----------------
+async function initHistorique() {
   const user = requireLogin();
   if (!user) return;
-  await loadJournal();
+  await loadHistorique();
 }
 
-async function loadJournal() {
+async function loadHistorique() {
   try {
     const { data: withdrawals } = await ghRead('data/withdrawals.json');
-    renderJournal(withdrawals);
+    renderHistorique(withdrawals);
   } catch (error) {
-    console.error('Erreur lors du chargement du journal:', error);
-    const container = document.getElementById('journalList');
+    console.error('Erreur lors du chargement de l’historique:', error);
+    const container = document.getElementById('historiqueList');
     if (container) {
-      container.innerHTML = '<p class="error" style="color: white;">Erreur lors du chargement du journal: ' + error.message + '</p>';
+      container.innerHTML = '<p class="error" style="color: white;">Erreur lors du chargement de l’historique: ' + error.message + '</p>';
     }
   }
 }
 
-function renderJournal(events) {
-  const container = document.getElementById('journalList');
+function renderHistorique(events) {
+  const container = document.getElementById('historiqueList');
   if (!container) return;
 
   container.innerHTML = '';
@@ -621,7 +820,7 @@ function renderJournal(events) {
     const userName = event.user_name || 'Utilisateur inconnu';
 
     const div = document.createElement('div');
-    div.className = 'journal-entry';
+    div.className = 'historique-entry';
 
     let itemsHtml = '';
     event.items.forEach(item => {
@@ -631,11 +830,11 @@ function renderJournal(events) {
     });
 
     div.innerHTML = `
-      <div class="journal-header">
+      <div class="historique-header">
         <strong>${userName}</strong>
-        <span class="journal-date">${date}</span>
+        <span class="historique-date">${date}</span>
       </div>
-      <ul class="journal-items">
+      <ul class="historique-items">
         ${itemsHtml}
       </ul>
     `;
