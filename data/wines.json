@@ -7,7 +7,7 @@
     "millesime": 1938,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D002",
+    "emplacement": "",
     "quantite": 131
   },
   {
@@ -18,7 +18,7 @@
     "millesime": 1937,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D005",
+    "emplacement": "",
     "quantite": 122
   },
   {
@@ -29,7 +29,7 @@
     "millesime": 1955,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D008",
+    "emplacement": "",
     "quantite": 112
   },
   {
@@ -40,7 +40,7 @@
     "millesime": 1937,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D012",
+    "emplacement": "",
     "quantite": 240
   },
   {
@@ -51,7 +51,7 @@
     "millesime": 1947,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D014",
+    "emplacement": "",
     "quantite": 45
   },
   {
@@ -62,7 +62,7 @@
     "millesime": 1955,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D018",
+    "emplacement": "",
     "quantite": 0
   },
   {
@@ -73,7 +73,7 @@
     "millesime": 1947,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "D028",
+    "emplacement": "",
     "quantite": 140
   },
   {
@@ -84,7 +84,7 @@
     "millesime": 1937,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D080",
+    "emplacement": "",
     "quantite": 0
   },
   {
@@ -95,7 +95,7 @@
     "millesime": 1988,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "D117",
+    "emplacement": "",
     "quantite": 116
   },
   {
@@ -106,7 +106,7 @@
     "millesime": 1947,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "F028",
+    "emplacement": "",
     "quantite": 0
   },
   {
@@ -117,7 +117,7 @@
     "millesime": 1978,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "NC",
+    "emplacement": "",
     "quantite": 22
   },
   {
@@ -128,7 +128,7 @@
     "millesime": 2012,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "K19",
+    "emplacement": "",
     "quantite": 79
   },
   {
@@ -139,7 +139,7 @@
     "millesime": 2009,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L22",
+    "emplacement": "",
     "quantite": 65
   },
   {
@@ -150,7 +150,7 @@
     "millesime": 2008,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L22",
+    "emplacement": "",
     "quantite": 145
   },
   {
@@ -161,7 +161,7 @@
     "millesime": 2006,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "L23",
+    "emplacement": "",
     "quantite": 10
   },
   {
@@ -172,7 +172,7 @@
     "millesime": 2010,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "L23",
+    "emplacement": "",
     "quantite": 25
   },
   {
@@ -183,7 +183,7 @@
     "millesime": 2006,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "L23",
+    "emplacement": "",
     "quantite": 18
   },
   {
@@ -194,7 +194,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L23",
+    "emplacement": "",
     "quantite": 86
   },
   {
@@ -205,7 +205,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L23",
+    "emplacement": "",
     "quantite": 5
   },
   {
@@ -216,7 +216,7 @@
     "millesime": 2008,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "L25",
+    "emplacement": "",
     "quantite": 11
   },
   {
@@ -227,7 +227,7 @@
     "millesime": 2008,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "L25",
+    "emplacement": "",
     "quantite": 30
   },
   {
@@ -238,7 +238,7 @@
     "millesime": 2008,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "L25",
+    "emplacement": "",
     "quantite": 7
   },
   {
@@ -249,7 +249,7 @@
     "millesime": 2008,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L25",
+    "emplacement": "",
     "quantite": 13
   },
   {
@@ -260,7 +260,7 @@
     "millesime": 2008,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L25",
+    "emplacement": "",
     "quantite": 10
   },
   {
@@ -271,7 +271,7 @@
     "millesime": 2015,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "L26",
+    "emplacement": "",
     "quantite": 273
   },
   {
@@ -282,7 +282,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L26",
+    "emplacement": "",
     "quantite": 41
   },
   {
@@ -293,7 +293,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "L26",
+    "emplacement": "",
     "quantite": 46
   },
   {
@@ -304,7 +304,7 @@
     "millesime": 2010,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M10",
+    "emplacement": "",
     "quantite": 10
   },
   {
@@ -315,7 +315,7 @@
     "millesime": 2002,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M10",
+    "emplacement": "",
     "quantite": 14
   },
   {
@@ -326,7 +326,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M10",
+    "emplacement": "",
     "quantite": 33
   },
   {
@@ -337,7 +337,7 @@
     "millesime": 1998,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M10",
+    "emplacement": "",
     "quantite": 58
   },
   {
@@ -348,7 +348,7 @@
     "millesime": 2009,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M13",
+    "emplacement": "",
     "quantite": 57
   },
   {
@@ -359,7 +359,7 @@
     "millesime": 2007,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M13",
+    "emplacement": "",
     "quantite": 83
   },
   {
@@ -370,7 +370,7 @@
     "millesime": 2007,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M13",
+    "emplacement": "",
     "quantite": 13
   },
   {
@@ -381,7 +381,7 @@
     "millesime": 2009,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M13",
+    "emplacement": "",
     "quantite": 12
   },
   {
@@ -392,7 +392,7 @@
     "millesime": 2012,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M14",
+    "emplacement": "",
     "quantite": 8
   },
   {
@@ -403,7 +403,7 @@
     "millesime": 2012,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M14",
+    "emplacement": "",
     "quantite": 6
   },
   {
@@ -414,7 +414,7 @@
     "millesime": 2012,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M14",
+    "emplacement": "",
     "quantite": 17
   },
   {
@@ -425,7 +425,7 @@
     "millesime": 2012,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M14",
+    "emplacement": "",
     "quantite": 3
   },
   {
@@ -436,7 +436,7 @@
     "millesime": 2001,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M15",
+    "emplacement": "",
     "quantite": 14
   },
   {
@@ -447,7 +447,7 @@
     "millesime": 2008,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M15",
+    "emplacement": "",
     "quantite": 32
   },
   {
@@ -458,7 +458,7 @@
     "millesime": 2006,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M17",
+    "emplacement": "",
     "quantite": 128
   },
   {
@@ -469,7 +469,7 @@
     "millesime": 2011,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M18",
+    "emplacement": "",
     "quantite": 47
   },
   {
@@ -480,7 +480,7 @@
     "millesime": 2011,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M18",
+    "emplacement": "",
     "quantite": 31
   },
   {
@@ -491,7 +491,7 @@
     "millesime": 2011,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M18",
+    "emplacement": "",
     "quantite": 50
   },
   {
@@ -502,7 +502,7 @@
     "millesime": 2004,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M18",
+    "emplacement": "",
     "quantite": 10
   },
   {
@@ -513,7 +513,7 @@
     "millesime": 2005,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M19",
+    "emplacement": "",
     "quantite": 6
   },
   {
@@ -524,7 +524,7 @@
     "millesime": 2005,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M19",
+    "emplacement": "",
     "quantite": 87
   },
   {
@@ -535,7 +535,7 @@
     "millesime": 1999,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M19",
+    "emplacement": "",
     "quantite": 97
   },
   {
@@ -546,7 +546,7 @@
     "millesime": 1999,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M19",
+    "emplacement": "",
     "quantite": 37
   },
   {
@@ -557,7 +557,7 @@
     "millesime": 2000,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M22",
+    "emplacement": "",
     "quantite": 65
   },
   {
@@ -568,7 +568,7 @@
     "millesime": 2004,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M23",
+    "emplacement": "",
     "quantite": 14
   },
   {
@@ -579,7 +579,7 @@
     "millesime": 2010,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M23",
+    "emplacement": "",
     "quantite": 13
   },
   {
@@ -590,7 +590,7 @@
     "millesime": 2003,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M23",
+    "emplacement": "",
     "quantite": 260
   },
   {
@@ -601,7 +601,7 @@
     "millesime": 2011,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M23",
+    "emplacement": "",
     "quantite": 37
   },
   {
@@ -612,7 +612,7 @@
     "millesime": 2005,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 24
   },
   {
@@ -623,7 +623,7 @@
     "millesime": 2004,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 79
   },
   {
@@ -634,7 +634,7 @@
     "millesime": 2005,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 8
   },
   {
@@ -645,7 +645,7 @@
     "millesime": 2005,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 13
   },
   {
@@ -656,7 +656,7 @@
     "millesime": 2005,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 47
   },
   {
@@ -667,7 +667,7 @@
     "millesime": 2005,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 11
   },
   {
@@ -678,7 +678,7 @@
     "millesime": 2004,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 85
   },
   {
@@ -689,7 +689,7 @@
     "millesime": 2005,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 75
   },
   {
@@ -700,7 +700,7 @@
     "millesime": 2005,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 102
   },
   {
@@ -711,7 +711,7 @@
     "millesime": 2003,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "M24",
+    "emplacement": "",
     "quantite": 75
   },
   {
@@ -722,7 +722,7 @@
     "millesime": 2011,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N15",
+    "emplacement": "",
     "quantite": 26
   },
   {
@@ -733,7 +733,7 @@
     "millesime": 2002,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N15",
+    "emplacement": "",
     "quantite": 38
   },
   {
@@ -744,7 +744,7 @@
     "millesime": 2007,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N20",
+    "emplacement": "",
     "quantite": 10
   },
   {
@@ -755,7 +755,7 @@
     "millesime": 2007,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N20",
+    "emplacement": "",
     "quantite": 17
   },
   {
@@ -766,7 +766,7 @@
     "millesime": 2007,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N20",
+    "emplacement": "",
     "quantite": 18
   },
   {
@@ -777,7 +777,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N20",
+    "emplacement": "",
     "quantite": 86
   },
   {
@@ -788,7 +788,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N20",
+    "emplacement": "",
     "quantite": 7
   },
   {
@@ -799,7 +799,7 @@
     "millesime": 2010,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N20",
+    "emplacement": "",
     "quantite": 45
   },
   {
@@ -810,7 +810,7 @@
     "millesime": 2007,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N20",
+    "emplacement": "",
     "quantite": 7
   },
   {
@@ -821,7 +821,7 @@
     "millesime": 2009,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N22",
+    "emplacement": "",
     "quantite": 12
   },
   {
@@ -832,7 +832,7 @@
     "millesime": 2003,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N24",
+    "emplacement": "",
     "quantite": 19
   },
   {
@@ -843,7 +843,7 @@
     "millesime": 2003,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N24",
+    "emplacement": "",
     "quantite": 81
   },
   {
@@ -854,7 +854,7 @@
     "millesime": 2003,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N24",
+    "emplacement": "",
     "quantite": 30
   },
   {
@@ -865,7 +865,7 @@
     "millesime": 2003,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N25",
+    "emplacement": "",
     "quantite": 19
   },
   {
@@ -876,7 +876,7 @@
     "millesime": 2006,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N26",
+    "emplacement": "",
     "quantite": 36
   },
   {
@@ -887,7 +887,7 @@
     "millesime": 2011,
     "couleur": "Blanc",
     "origine": null,
-    "emplacement": "N27",
+    "emplacement": "",
     "quantite": 42
   },
   {
@@ -898,7 +898,7 @@
     "millesime": 2006,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N27",
+    "emplacement": "",
     "quantite": 9
   },
   {
@@ -909,7 +909,7 @@
     "millesime": 2006,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N27",
+    "emplacement": "",
     "quantite": 44
   },
   {
@@ -920,7 +920,7 @@
     "millesime": 2006,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N27",
+    "emplacement": "",
     "quantite": 25
   },
   {
@@ -931,7 +931,7 @@
     "millesime": 2006,
     "couleur": "Rouge",
     "origine": null,
-    "emplacement": "N27",
+    "emplacement": "",
     "quantite": 41
   }
 ]
