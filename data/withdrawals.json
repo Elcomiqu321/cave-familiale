@@ -1,5 +1,33 @@
 [
   {
+    "id": "8bf19890-4b42-495e-9954-d097ee7665f5",
+    "user_id": "f56f8f09-2ef8-4aac-bc77-1445bde25c64",
+    "user_name": "Armand Picard",
+    "withdrawn_at": "2026-11-09T16:38:34.384Z",
+    "items": [
+      {
+        "wine_id": "db899967-aa84-411f-9934-7eeda5809b4e",
+        "appellation": "Saint Aubin",
+        "cru": "Premier Cru",
+        "climat": "Le Charmois",
+        "emplacement": null,
+        "millesime": 2015,
+        "couleur": "Blanc",
+        "quantity": 1
+      },
+      {
+        "wine_id": "bb0b374a-bf06-47db-9064-5d34128e169c",
+        "appellation": "Saint Aubin",
+        "cru": "Premier Cru",
+        "climat": "Le Charmois",
+        "emplacement": null,
+        "millesime": 2012,
+        "couleur": "Rouge",
+        "quantity": 18
+      }
+    ]
+  },
+  {
     "id": "814b3787-254d-45a2-88db-6509419aba28",
     "user_id": "f56f8f09-2ef8-4aac-bc77-1445bde25c64",
     "user_name": "Armand Picard",
