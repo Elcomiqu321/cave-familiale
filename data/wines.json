@@ -90,7 +90,7 @@
   {
     "id": "ca1142b7-52cf-4bf3-bd13-d338d607de73",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Nicolas Rolin",
     "millesime": 1988,
     "couleur": "Rouge",
@@ -112,7 +112,7 @@
   {
     "id": "65fd6ffc-db65-448a-9b92-dd27ff1add2c",
     "appellation": "Nuits Saint Georges",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": null,
     "millesime": 1978,
     "couleur": "Rouge",
@@ -123,7 +123,7 @@
   {
     "id": "bb0b374a-bf06-47db-9064-5d34128e169c",
     "appellation": "Saint Aubin",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Le Charmois",
     "millesime": 2012,
     "couleur": "Rouge",
@@ -134,7 +134,7 @@
   {
     "id": "54553a53-5a4c-460b-badf-9e5f0fb034c3",
     "appellation": "Mercurey",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": null,
     "millesime": 2009,
     "couleur": "Rouge",
@@ -145,7 +145,7 @@
   {
     "id": "3398eec4-b252-4c3b-936c-f510af67efe7",
     "appellation": "Pommard",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Le Clos Micot",
     "millesime": 2008,
     "couleur": "Rouge",
@@ -167,7 +167,7 @@
   {
     "id": "250ab777-1b5f-4f34-b513-e972cd9641d0",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "La Maltroie",
     "millesime": 2010,
     "couleur": "Blanc",
@@ -266,7 +266,7 @@
   {
     "id": "db899967-aa84-411f-9934-7eeda5809b4e",
     "appellation": "Saint Aubin",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Le Charmois",
     "millesime": 2015,
     "couleur": "Blanc",
@@ -277,7 +277,7 @@
   {
     "id": "458ac2ed-17c1-4b2b-a867-fb990ad99ae5",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Grèves Cuvée Floquet",
     "millesime": 2007,
     "couleur": "Rouge",
@@ -299,7 +299,7 @@
   {
     "id": "a5f73f88-726b-414f-8b09-0181878a8194",
     "appellation": "Saint Aubin",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "En Remilly",
     "millesime": 2010,
     "couleur": "Blanc",
@@ -310,7 +310,7 @@
   {
     "id": "5b9e79ab-f495-4cfb-824b-bc07d1e79d88",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Guigone de Salins",
     "millesime": 2002,
     "couleur": "Rouge",
@@ -376,7 +376,7 @@
   {
     "id": "0413a21b-4d20-460a-887d-80d056dcb46f",
     "appellation": "Puligny Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Chalumaux",
     "millesime": 2009,
     "couleur": "Blanc",
@@ -387,7 +387,7 @@
   {
     "id": "5013553e-b8a9-4380-812b-2293f7cbf538",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Clos St Jean",
     "millesime": 2012,
     "couleur": "Blanc",
@@ -398,7 +398,7 @@
   {
     "id": "17edbd7a-c773-4655-90ba-290554c5e996",
     "appellation": "Meursault",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Charmes Cuvée Bahèzre de Lanlay",
     "millesime": 2012,
     "couleur": "Blanc",
@@ -409,7 +409,7 @@
   {
     "id": "a5f36dec-721c-4007-9c44-37331325e75d",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Bétault",
     "millesime": 2012,
     "couleur": "Rouge",
@@ -431,7 +431,7 @@
   {
     "id": "be78354c-daeb-43de-a9b5-0ebd19f2d062",
     "appellation": "Meursault",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Charmes Cuvée Grivault",
     "millesime": 2001,
     "couleur": "Blanc",
@@ -442,7 +442,7 @@
   {
     "id": "2724a036-6715-4e84-98bd-8530be8a6f55",
     "appellation": "Puligny Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "La Garenne",
     "millesime": 2008,
     "couleur": "Blanc",
@@ -453,7 +453,7 @@
   {
     "id": "35785d7a-b5cc-44be-996b-b5e67bbea6c0",
     "appellation": "Nuits Saint Georges",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Vaucrains",
     "millesime": 2006,
     "couleur": "Rouge",
@@ -464,7 +464,7 @@
   {
     "id": "9f4c9e4e-1ed8-46fc-bb9b-428820fdb2af",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "La Maltroie",
     "millesime": 2011,
     "couleur": "Blanc",
@@ -475,7 +475,7 @@
   {
     "id": "19166d9b-ee3b-48c7-a391-acdb5854262c",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Chaumées",
     "millesime": 2011,
     "couleur": "Blanc",
@@ -486,7 +486,7 @@
   {
     "id": "5993fd6a-b28b-47eb-a5ce-f426e8b465fc",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Chenevottes",
     "millesime": 2011,
     "couleur": "Blanc",
@@ -497,7 +497,7 @@
   {
     "id": "b78bd24e-feda-4394-b184-5433ef49e92c",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Chaumées",
     "millesime": 2004,
     "couleur": "Rouge",
@@ -519,7 +519,7 @@
   {
     "id": "d8becf42-90fb-4167-8a4a-d58cac54f11b",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Macherelles",
     "millesime": 2005,
     "couleur": "Rouge",
@@ -541,7 +541,7 @@
   {
     "id": "300d04bd-a7d3-42be-bfa6-149c20f0a4be",
     "appellation": "Volnay",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Santenots Cuvée Yehan Massol",
     "millesime": 1999,
     "couleur": "Rouge",
@@ -552,7 +552,7 @@
   {
     "id": "ff24a3f1-e9bc-4c2b-94c3-e072ab62ec60",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Cyrot Chaudron",
     "millesime": 2000,
     "couleur": "Rouge",
@@ -618,7 +618,7 @@
   {
     "id": "9321a9ac-0f09-4415-9625-8b02a9f94478",
     "appellation": "Puligny Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Demoiselles",
     "millesime": 2004,
     "couleur": "Blanc",
@@ -629,7 +629,7 @@
   {
     "id": "b810ba3a-e2b9-41a4-a669-352d9f9ebba4",
     "appellation": "Puligny Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": null,
     "millesime": 2005,
     "couleur": "Blanc",
@@ -640,7 +640,7 @@
   {
     "id": "7dda1fb2-5ae7-4799-a66a-a3ad23cd7196",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Brunet",
     "millesime": 2005,
     "couleur": "Rouge",
@@ -651,7 +651,7 @@
   {
     "id": "039e0353-d4ab-47f9-8fac-77bf9d2d79cf",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Dames des Flandres",
     "millesime": 2005,
     "couleur": "Rouge",
@@ -684,7 +684,7 @@
   {
     "id": "e25a4750-c8e7-41ed-8ea9-55f63a94f9c2",
     "appellation": "Savigny les Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Forneret",
     "millesime": 2005,
     "couleur": "Rouge",
@@ -706,7 +706,7 @@
   {
     "id": "96aba351-7825-456e-bfca-69d540d2ef28",
     "appellation": "Volnay",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Gauvain",
     "millesime": 2003,
     "couleur": "Rouge",
@@ -717,7 +717,7 @@
   {
     "id": "d17627e9-7cd0-4775-b301-0587453816a8",
     "appellation": "Chassagne Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Clos St Jean",
     "millesime": 2011,
     "couleur": "Blanc",
@@ -728,7 +728,7 @@
   {
     "id": "8ce5b4d2-2abd-4b36-89c5-681f4ece5295",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Guigone de Salins",
     "millesime": 2002,
     "couleur": "Rouge",
@@ -805,7 +805,7 @@
   {
     "id": "7cc99a8d-005e-493c-968c-867afd306a32",
     "appellation": "Nuits Saint Georges",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": null,
     "millesime": 2007,
     "couleur": "Rouge",
@@ -816,7 +816,7 @@
   {
     "id": "c49e6368-2453-4ebb-9389-8f3024720783",
     "appellation": "Savigny les Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Arthur Girard",
     "millesime": 2009,
     "couleur": "Rouge",
@@ -827,7 +827,7 @@
   {
     "id": "75e9308f-218c-482a-956f-268e4fa55c82",
     "appellation": "Meursault",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Charmes Cuvée Grivault",
     "millesime": 2003,
     "couleur": "Blanc",
@@ -838,7 +838,7 @@
   {
     "id": "e6b6aa42-a545-47d1-b2b5-4e0abd8347e9",
     "appellation": "Beaune",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Cuvée Dames des Flandres",
     "millesime": 2003,
     "couleur": "Rouge",
@@ -882,7 +882,7 @@
   {
     "id": "b50ad278-b41f-40d5-9af6-2544456b5b49",
     "appellation": "Puligny Montrachet",
-    "cru": "1C",
+    "cru": "Premier Cru",
     "climat": "Les Demoiselles",
     "millesime": 2011,
     "couleur": "Blanc",
